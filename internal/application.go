@@ -8,7 +8,7 @@ import (
 
 	version "github.com/misnaged/annales/versioner"
 
-	"microservice-template/config"
+	"oracle-flare/config"
 )
 
 // App is main microservice application instance that
