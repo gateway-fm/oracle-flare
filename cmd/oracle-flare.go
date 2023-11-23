@@ -5,9 +5,9 @@ import (
 
 	"github.com/misnaged/annales/logger"
 
-	"microservice-template/cmd/root"
-	"microservice-template/cmd/serve"
-	"microservice-template/internal"
+	"oracle-flare/cmd/root"
+	"oracle-flare/cmd/serve"
+	"oracle-flare/internal"
 )
 
 // main is the entry point of the application

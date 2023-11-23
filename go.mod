@@ -1,4 +1,4 @@
-module microservice-template
+module oracle-flare
 
 go 1.21
 

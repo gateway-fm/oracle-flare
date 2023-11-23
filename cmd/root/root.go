@@ -8,15 +8,15 @@ import (
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 
-	"microservice-template/config"
-	"microservice-template/internal"
+	"oracle-flare/config"
+	"oracle-flare/internal"
 )
 
 // Cmd returns the root command for the application
 func Cmd(app *internal.App) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:              "microservice",
-		Short:            "Service Template",
+		Short:            "Oracle Flare",
 		TraverseChildren: true,
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			return initializeConfig(cmd, app.Config())
