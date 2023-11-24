@@ -38,6 +38,7 @@ func NewFlare(conf *config.Flare) IFlare {
 }
 
 func (f *flare) init() {
+	logInfo("new flare pkg init...", "Init")
 	id := ChainIDFromInt(f.conf.ChainID)
 
 	if id == UnknownChain {
@@ -66,7 +67,7 @@ func (f *flare) init() {
 		logFatal(fmt.Sprintln("get submitter address error:", err.Error()), "Init")
 	}
 
-	ftsoAddress, err := f.register.getContractAddress("Ftso")
+	ftsoAddress, err := f.register.getContractAddress("FtsoManager")
 	if err != nil {
 		logFatal(fmt.Sprintln("get ftsoManager address error:", err.Error()), "Init")
 	}

@@ -3,6 +3,7 @@ package wsClient
 import (
 	"encoding/json"
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -19,13 +20,18 @@ type client struct {
 	conf *config.WS
 	conn *websocket.Conn
 
-	streams map[int]chan *CoinAveragePriceStream
-	stop    chan struct{}
+	mu sync.Mutex
+
+	subscription bool
+	streams      map[int]chan *CoinAveragePriceStream
+	stop         chan struct{}
 }
 
 func NewClient(conf *config.WS) IWSClient {
 	c := &client{
-		conf: conf,
+		conf:         conf,
+		mu:           sync.Mutex{},
+		subscription: false,
 	}
 
 	c.init()
@@ -35,6 +41,7 @@ func NewClient(conf *config.WS) IWSClient {
 }
 
 func (c *client) init() {
+	logInfo("new ws client init...", "Init")
 	conn, _, err := websocket.DefaultDialer.Dial(c.conf.URL, nil)
 	if err != nil {
 		logFatal(fmt.Sprintln("err dial server:", err.Error()), "Init")
@@ -59,6 +66,7 @@ func (c *client) Close() {
 }
 
 func (c *client) listenWS() {
+	logInfo("listening to ws oracle...", "listenWS")
 	for {
 		select {
 		case <-c.stop:
@@ -70,6 +78,8 @@ func (c *client) listenWS() {
 				logWarn(fmt.Sprintln("err from server:", err.Error()), "listenWS")
 				return
 			}
+
+			logDebug("received msg", "listenWS")
 
 			logSuccess(data)
 			c.sendData(data)
@@ -85,11 +95,13 @@ func (c *client) sendData(data []byte) {
 	}
 
 	if dataResp.Result.Timestamp != 0 {
+		c.mu.Lock()
 		c.streams[dataResp.ID] <- &CoinAveragePriceStream{
 			Coin:      dataResp.Result.Coin,
 			Timestamp: dataResp.Result.Timestamp,
 			Value:     dataResp.Result.Value,
 		}
+		c.mu.Unlock()
 	}
 }
 

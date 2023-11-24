@@ -8,6 +8,7 @@ import (
 )
 
 func (c *client) SubscribeCoinAveragePrice(coins []string, id int, frequencyMS int, v chan *CoinAveragePriceStream) error {
+	logInfo(fmt.Sprintln("subscribing on coins:", coins), "SubscribeCoinAveragePrice")
 	req := &CoinAveragePriceRequest{
 		ID:      id,
 		JSONRPC: "2.0",

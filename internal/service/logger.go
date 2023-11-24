@@ -21,3 +21,7 @@ func logInfo(msg string, method string) {
 func logErr(msg string, method string) {
 	logger.Log().WithField("layer", fmt.Sprintf("Service-%s", method)).Error(msg)
 }
+
+func logDebug(msg string, method string) {
+	logger.Log().WithField("layer", fmt.Sprintf("Service-%s", method)).Debug(msg)
+}

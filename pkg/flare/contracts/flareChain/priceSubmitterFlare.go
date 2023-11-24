@@ -1,6 +1,7 @@
 package flareChain
 
 import (
+	"log"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
@@ -43,10 +44,14 @@ func (c *priceSubmitter) init() {
 
 func (c *priceSubmitter) CommitPrices(epochID *big.Int, indices []*big.Int, prices []*big.Int, random *big.Int) error {
 	//TODO: implement
+	log.Printf("received commit epoch:%v random:%v price:%v", epochID.Uint64(), random.Uint64(), prices[0].Uint64())
+
 	return nil
 }
 
 func (c *priceSubmitter) RevealPrices(epochID *big.Int, indices []*big.Int, prices []*big.Int, random *big.Int) error {
 	//TODO: implement
+	log.Printf("received reveal epoch:%v random:%v price:%v", epochID.Uint64(), random.Uint64(), prices[0].Uint64())
+
 	return nil
 }

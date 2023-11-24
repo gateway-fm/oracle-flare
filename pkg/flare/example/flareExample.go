@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"oracle-flare/config"
 	"oracle-flare/pkg/flare"
 )
@@ -11,6 +12,16 @@ func main() {
 		RpcURL:                  "https://songbird-api.flare.network/ext/C/rpc",
 		ChainID:                 19,
 	})
+
+	epochData, err := f.GetCurrentPriceEpochData()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	log.Printf(
+		"start timestamp: %s end timestamp: %s reveal timestamp: %s",
+		epochData.StartTimestamp, epochData.EndTimestamp, epochData.RevealEndTimestamp,
+	)
 
 	f.Close()
 }

@@ -42,6 +42,19 @@ func (c *ftsoManger) init() {
 }
 
 func (c *ftsoManger) GetCurrentPriceEpochData() (*contracts.PriceEpochData, error) {
-	//TODO: implement
-	return &contracts.PriceEpochData{EpochID: big.NewInt(0), SubmitTime: big.NewInt(0), RevealTime: big.NewInt(0), VotePower: big.NewInt(0)}, nil
+	out := []interface{}{}
+
+	if err := c.contract.Call(&bind.CallOpts{}, &out, "getCurrentPriceEpochData"); err != nil {
+		return nil, err
+	}
+
+	p := &contracts.PriceEpochData{}
+
+	p.EpochID = abi.ConvertType(out[0], new(big.Int)).(*big.Int)
+	p.StartTimestamp = abi.ConvertType(out[1], new(big.Int)).(*big.Int)
+	p.EndTimestamp = abi.ConvertType(out[2], new(big.Int)).(*big.Int)
+	p.RevealEndTimestamp = abi.ConvertType(out[3], new(big.Int)).(*big.Int)
+	p.CurrentTimestamp = abi.ConvertType(out[4], new(big.Int)).(*big.Int)
+
+	return p, nil
 }
