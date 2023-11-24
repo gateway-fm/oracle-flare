@@ -1,0 +1,437 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "additionalProperties": false,
+    "definitions": {
+        "AssetParameters": {
+            "additionalProperties": false,
+            "properties": {
+                "assetDecimals": {
+                    "description": "Native decimals for the currency - e.g. 8 for Bitcoin, 18 for Ethereum.",
+                    "type": "integer"
+                },
+                "assetSymbol": {
+                    "description": "The currency symbol.",
+                    "type": "string"
+                },
+                "dummyAssetMinterMax": {
+                    "description": "Only used in dev testing deploys - the max amount minted.",
+                    "type": "integer"
+                },
+                "elasticBandWidthPPM": {
+                    "description": "Hybrid reward band, prices within elasticBandWidthPPM of median are rewarded (in parts-per-million).",
+                    "type": "integer"
+                },
+                "ftsoDecimals": {
+                    "description": "Number of decimals in FTSO USD price.",
+                    "type": "integer"
+                },
+                "initialPriceUSDDec5": {
+                    "description": "The USD price of the asset at deploy time (in scaled USD: 1 USD = 10^5 USDDec5). \nUsually 0, which means that the useful starting price is obtained after first voting.",
+                    "type": "integer"
+                },
+                "xAssetName": {
+                    "description": "The name of the corresponding f-asset.",
+                    "type": "string"
+                },
+                "xAssetSymbol": {
+                    "description": "The symbol of the corresponding f-asset.",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "assetDecimals",
+                "assetSymbol",
+                "dummyAssetMinterMax",
+                "elasticBandWidthPPM",
+                "ftsoDecimals",
+                "initialPriceUSDDec5",
+                "xAssetName",
+                "xAssetSymbol"
+            ],
+            "type": "object"
+        }
+    },
+    "properties": {
+        "$schema": {
+            "type": "string"
+        },
+        "NATMultiAssets": {
+            "description": "List of multiasset symbols.",
+            "items": {
+                "type": "string"
+            },
+            "type": "array"
+        },
+        "addAfterNotChilledEpochs": {
+            "description": "Number of last consecutive epochs in which data provider should not be chilled in order to be accepted to the management group.",
+            "type": "integer"
+        },
+        "addAfterRewardedEpochs": {
+            "description": "Number of last consecutive epochs in which data provider needs to earn rewards in order to be accepted to the management group.",
+            "type": "integer"
+        },
+        "assets": {
+            "items": {
+                "$ref": "#/definitions/AssetParameters"
+            },
+            "type": "array"
+        },
+        "defaultRewardFeePercentageBIPS": {
+            "description": "Default value for fee percentage, in BIPS. \nIf a data provider does not change the fee percentage, this is the default percentage used for fee deduction. \nWhen set to 0, this means there is no fee.",
+            "type": "integer"
+        },
+        "defaultVoterWhitelistSize": {
+            "description": "Inital size for voter whitelist for price submission. It can later be changed for each FTSO by the governance.",
+            "type": "integer"
+        },
+        "deployDummyXAssetTokensAndMinters": {
+            "description": "Whether dummy FAsset tokens should be deployed. Only `true` for dev testing deploys.",
+            "type": "boolean"
+        },
+        "deployNATFtso": {
+            "description": "Whether NAT token FTSO should be deployed.",
+            "type": "boolean"
+        },
+        "deployerPrivateKey": {
+            "description": "Deployer private key. Overriden if provided in `.env` file as `DEPLOYER_PRIVATE_KEY`",
+            "type": "string"
+        },
+        "elasticBandRewardBIPS": {
+            "description": "Hybrid reward band, where elasticBandRewardBIPS goes to the elastic band and 10000 - elasticBandRewardBIPS to the IQR. \n For test purposes we recommend 0.",
+            "type": "integer"
+        },
+        "executorFeeValueUpdateOffsetEpochs": {
+            "description": "Executor fee value update timelock measured in reward epochs.\nThe parameter determines in how many reward epochs the new fee value submitted by an executor becomes effective. \nFor test purposes we recommend 3.",
+            "type": "integer"
+        },
+        "executorMaxFeeValueNAT": {
+            "description": "Max allowed executor fee value. In whole native units, not Wei.",
+            "type": "integer"
+        },
+        "executorMinFeeValueWei": {
+            "description": "Min allowed executor fee value, in natural currency Wei.\nBig integer, formatted as string.",
+            "type": "string"
+        },
+        "executorRegisterFeeValueNAT": {
+            "description": "Executor registration fee value. In whole native units, not Wei.",
+            "type": "integer"
+        },
+        "flareDaemonAddress": {
+            "description": "Flare daemon contract address. It is deployed in the genesis block with the fixed address \"0x1000000000000000000000000000000000000002\".",
+            "type": "string"
+        },
+        "flareDaemonGasExceededHoldoffBlocks": {
+            "description": "The number of blocks a daemon called contract is skipped if it consumes more than its alloted amount of gas.",
+            "type": "integer"
+        },
+        "foundationAddresses": {
+            "description": "List of Foundation addresses whose balance should be excluded from circulating supply.",
+            "items": {
+                "type": "string"
+            },
+            "type": "array"
+        },
+        "ftsoManagerGasLimit": {
+            "description": "Gas limit for daemonize calls of on FtsoManager contract.",
+            "type": "integer"
+        },
+        "ftsoRewardExpiryOffsetDays": {
+            "description": "Reward expiry time in days. After this many days reward epoch funds expire and can not be claimed any more. \nIf expiry value is 90 days and reward epoch length is 10 days, any reward epoch that was opened more then 90 days ago will expire.",
+            "type": "number"
+        },
+        "genesisGovernancePrivateKey": {
+            "description": "Genesis governance private key (the key used as governance during deploy). \nOverriden if set in `.env` file as `GENESIS_GOVERNANCE_PRIVATE_KEY`.",
+            "type": "string"
+        },
+        "governanceExecutorPublicKey": {
+            "description": "The public key of the executor (the account that is allowed to execute governance operations once the timelock expires).\nOverriden if provided in `.env` file as `GOVERNANCE_EXECUTOR_PUBLIC_KEY`.",
+            "type": "string"
+        },
+        "governancePrivateKey": {
+            "description": "Governance private key (the private part of `governancePublicKey`). \nOverriden if provided in `.env` file as `GOVERNANCE_PRIVATE_KEY`.\nNote: this is only used in test deploys. In production, governance is a multisig address and there is no private key.",
+            "type": "string"
+        },
+        "governancePublicKey": {
+            "description": "Governance public key (the key to which governance is transferred after deploy). \nOverriden if provided in `.env` file as `GOVERNANCE_PUBLIC_KEY`.",
+            "type": "string"
+        },
+        "governanceSettingsAddress": {
+            "description": "Governance settings contract address. It is deployed to the fixed address  \"0x183fAfF6997C98A812A3B98748Fc80241D08f312.\".",
+            "type": "string"
+        },
+        "governanceSettingsDeployerPrivateKey": {
+            "description": "Governance settings deployer private key. Overriden if provided in `.env` file as `GOVERNANCE_SETTINGS_DEPLOYER_PRIVATE_KEY`. Not needed for hardhat tests.",
+            "type": "string"
+        },
+        "governanceTimelock": {
+            "description": "The timelock in seconds to use for all governance operations (the time that has to pass before any governance operation is executed).\nIt safeguards the system against bad governance decisions or hijacked governance.",
+            "type": "integer"
+        },
+        "highAssetThresholdUSDDec5": {
+            "description": "High threshold for asset USD value (in scaled USD: 1 USD = 10^5 USDDec5). See `lowAssetThresholdUSDDec5` for explanation.\nFor test purposes we recommend setting `highAssetThresholdUSDDec5` to 3000000000.",
+            "type": "integer"
+        },
+        "highAssetTurnoutThresholdBIPS": {
+            "description": "Threshold for high asset turnout (in BIPS relative to total asset vote power). If the asset vote power turnout\nis below highAssetTurnoutThreshold, the asset weight based on total asset USD value (as calculated above)\nis multiplied by `actual_asset_turnout_BIPS / highAssetTurnoutThresholdBIPS`.\nFor test purposes we recommend 100.",
+            "type": "integer"
+        },
+        "inflationGasLimit": {
+            "description": "Gas limit for daemonize calls of on Inflation contract.",
+            "type": "integer"
+        },
+        "inflationReceivers": {
+            "description": "List of contract names (strings) that are inflation receivers.",
+            "items": {
+                "type": "string"
+            },
+            "type": "array"
+        },
+        "inflationSharingBIPS": {
+            "description": "List of inflation sharing percentages in BIPS for inflation receivers. Should match contracts `inflationReceivers`.\nShould add up to 100% (10000 BIPS).",
+            "items": {
+                "type": "number"
+            },
+            "type": "array"
+        },
+        "inflationStartDelaySeconds": {
+            "description": "Offset of the start of the first inflation time slot from the time of deploy (system start parameter), in seconds.",
+            "type": "integer"
+        },
+        "inflationTopUpFactorsx100": {
+            "description": "List of inflation top up factors for inflation receivers. Should match contracts `inflationReceivers`. E.g. 300 means 3x of expected daily allocation.",
+            "items": {
+                "type": "number"
+            },
+            "type": "array"
+        },
+        "inflationTopUpTypes": {
+            "description": "List of inflation top up types for inflation receivers. Should match contracts `inflationReceivers`.\nCan be 0 or 1 for each receiver  (see the enum TopupType in `RewardService.sol`)",
+            "items": {
+                "type": "number"
+            },
+            "type": "array"
+        },
+        "initialWnatPriceUSDDec5": {
+            "description": "The USD price of native currency at deploy time (in scaled USD: 1 USD = 10^5 USDDec5). \nUsually 0, which means that the useful starting price is obtained after first voting.",
+            "type": "integer"
+        },
+        "lowAssetThresholdUSDDec5": {
+            "description": "Low threshold for asset USD value (in scaled USD: 1 USD = 10^5 USDDec5).\nDetermines the weight ratio between native token and asset vote power.\nTotal asset vote power below *lowAssetThreshold* means that only native token vote power is used.\nFor values between *lowAssetThreshold* and *highAssetThreshold*, the asset vote power ratio scales linearly from 5% to 50%.\nFor values above *highAssetThreshold* the asset vote power ratio is 50%.\nFor test purposes we recommend setting `lowAssetThresholdUSDDec5` to 200000000.",
+            "type": "integer"
+        },
+        "lowNatTurnoutThresholdBIPS": {
+            "description": "Threshold for low native token turnout (in BIPS relative to total native token supply).\nIf the turnout is smaller than this parameter, only votes from trusted addresses are used to determine the price.\nFor test purposes we recommend 300.",
+            "type": "integer"
+        },
+        "maintainer": {
+            "description": "Address of maintainer of PollingFtso contract.",
+            "type": "string"
+        },
+        "majorityConditionBIPS": {
+            "description": "Majority condition (in BIPS) for proposal to be accepted. If less than majorityConditionBIPS votes in favor, proposal can't be accepted.",
+            "type": "integer"
+        },
+        "maxVotePowerAssetThresholdFraction": {
+            "description": "Defines high threshold for asset vote power when revealing a price vote. \nThe actual max threshold is calculated as `total_NAT_vote_power / maxVotePowerNatThresholdFraction`.\nAny provider's asset vote power is capped to this max threshold when revealing a price vote.",
+            "type": "integer"
+        },
+        "maxVotePowerNatThresholdFraction": {
+            "description": "Defines high threshold for native token vote power when revealing a price vote. The actual max threshold is calculated as \n`total_NAT_vote_power / maxVotePowerNatThresholdFraction`. \nAny provider's native token vote power is capped to this max threshold when revealing a price vote.",
+            "type": "integer"
+        },
+        "nativeElasticBandWidthPPM": {
+            "description": "Hybrid reward band, prices for native currency within nativeElasticBandWidthPPM of median are rewarded (in parts-per-million).",
+            "type": "integer"
+        },
+        "nativeFtsoDecimals": {
+            "description": "The number of decimals for USD price of the native currency.",
+            "type": "integer"
+        },
+        "nativeSymbol": {
+            "description": "The symbol of the native currency (used as symbol for FTSO).",
+            "type": "string"
+        },
+        "priceDeviationThresholdBIPS": {
+            "description": "Threshold (in BIPS) for price change between two epochs. Above this change price calculation switches to trusted votes only.",
+            "type": "integer"
+        },
+        "priceEpochCyclicBufferSize": {
+            "description": "The number of price epochs after which the price information storage is recycled.",
+            "type": "integer"
+        },
+        "priceEpochDurationSeconds": {
+            "description": "Price epoch duration, in seconds. Typical production value is 180 seconds (3 minutes).",
+            "type": "integer"
+        },
+        "priceSubmitterAddress": {
+            "description": "Price submiter contract address. It is deployed to the genesis block with the fixed address  \"0x1000000000000000000000000000000000000003\".",
+            "type": "string"
+        },
+        "proposalFeeValueNAT": {
+            "description": "Cost of creating proposal (in NAT). It is paid by the proposer.",
+            "type": "integer"
+        },
+        "proposers": {
+            "description": "Array of proposers that can create a proposal",
+            "items": {
+                "type": "string"
+            },
+            "type": "array"
+        },
+        "removeAfterEligibleProposals": {
+            "description": "Number of last relevant proposals to check for not voting. Proposal is relevant if quorum was achieved and voting has ended.",
+            "type": "integer"
+        },
+        "removeAfterNonParticipatingProposals": {
+            "description": "In how many of removeAfterEligibleProposals proposals should data provider not participate (vote) in order to be eligible for removal from the management group.",
+            "type": "integer"
+        },
+        "removeAfterNotRewardedEpochs": {
+            "description": "Number of last consecutive epochs in which data provider should not earn rewards in order to be eligible for removal from the management group.",
+            "type": "integer"
+        },
+        "removeForDays": {
+            "description": "Number of days for which member is removed from the management group.",
+            "type": "integer"
+        },
+        "revealEpochDurationSeconds": {
+            "description": "Reveal epoch duration, in seconds. Usually, it should be at most half of `priceEpochDurationSeconds` (90 seconds).",
+            "type": "integer"
+        },
+        "rewardEpochDurationSeconds": {
+            "description": "Reward epoch duration, in seconds. In production it is 2-7 days (172800-604800 seconds), but for test purposes it's much smaller e.g. 3-7 minutes.",
+            "type": "integer"
+        },
+        "rewardEpochsStartDelayPriceEpochs": {
+            "description": "Offset of the start of reward epochs from the time of deploy (system start parameter), in number of price epochs. \nTypical production value is 3, so first reward epoch starts after \n`rewardEpochsStartDelayPriceEpochs * priceEpochDurationSeconds + revealEpochDurationSeconds` (10.5 minutes).",
+            "type": "integer"
+        },
+        "rewardFeePercentageUpdateOffsetEpochs": {
+            "description": "Reward fee percentage update timelock measured in reward epochs.\nThe parameter determines in how many reward epochs the new fee percentage submitted by a data provider becomes effective. \nFor test purposes we recommend 3.",
+            "type": "integer"
+        },
+        "scheduledInflationPercentageBIPS": {
+            "description": "Monthly (FLR) / Yearly (SGB) inflation in BIPS. Every month/year the value changes to the next value in the list (until the list is exhausted, after which the inflation remains constant).",
+            "items": {
+                "type": "number"
+            },
+            "type": "array"
+        },
+        "stateConnectorAddress": {
+            "description": "State connector contract address. State connector is deployed in the genesis block at fixed address \"0x1000000000000000000000000000000000000001\".",
+            "type": "string"
+        },
+        "thresholdConditionBIPS": {
+            "description": "Threshold (in BIPS) for proposal to potentially be accepted. If less than thresholdConditionBIPS of total vote power participates in vote, proposal can't be accepted.",
+            "type": "integer"
+        },
+        "totalExcludedSupplyNAT": {
+            "description": "Non circulating supply that is temporary excluded (escrow, distribution). In whole native units, not Wei.",
+            "type": "integer"
+        },
+        "totalNativeSupplyNAT": {
+            "description": "Initial total supply of native tokens (FLR/SGB). In whole native units, not Wei.",
+            "type": "integer"
+        },
+        "trustedAddresses": {
+            "description": "The list of addresses used for voting when native token turnout is below *lowNatTurnoutThreshold* or when price deviation is too big.\nThe prices from trusted addresses are also used indepepndently in f-asset system for calculating a second threshold collateral ratio for agent liquidation.",
+            "items": {
+                "type": "string"
+            },
+            "type": "array"
+        },
+        "votePowerIntervalFraction": {
+            "description": "Defines interval from which vote power block is randomly selected as a fraction of previous reward epoch. \nThe new vote power block is randomly chosen during finalization block from the last\n`(finalization_block_number - start_epoch_block_number) / votePowerIntervalFraction`\nblocks. Larger value of `votePowerIntervalFraction` means shorter interval, which gives 'fresher' vote power block, but less chance for randomization.\nFor example, if `votePowerIntervalFraction=7` and reward epoch duration is 7 days, vote power block is chosen from the last day of the epoch being finalized.",
+            "type": "integer"
+        },
+        "votingDelaySeconds": {
+            "description": "Period (in seconds) between creation of proposal and voting start time.",
+            "type": "integer"
+        },
+        "votingPeriodSeconds": {
+            "description": "Length (in seconds) of voting period.",
+            "type": "integer"
+        },
+        "wrappedNativeName": {
+            "description": "The name of the wrapped currency (e.g. Wrapped Flare / Wrapped Songbird).",
+            "type": "string"
+        },
+        "wrappedNativeSymbol": {
+            "description": "The symbol of the wrapped currency (e.g. wFLR/wSGB).",
+            "type": "string"
+        }
+    },
+    "required": [
+        "NATMultiAssets",
+        "addAfterNotChilledEpochs",
+        "addAfterRewardedEpochs",
+        "assets",
+        "defaultRewardFeePercentageBIPS",
+        "defaultVoterWhitelistSize",
+        "deployDummyXAssetTokensAndMinters",
+        "deployNATFtso",
+        "deployerPrivateKey",
+        "elasticBandRewardBIPS",
+        "executorFeeValueUpdateOffsetEpochs",
+        "executorMaxFeeValueNAT",
+        "executorMinFeeValueWei",
+        "executorRegisterFeeValueNAT",
+        "flareDaemonAddress",
+        "flareDaemonGasExceededHoldoffBlocks",
+        "foundationAddresses",
+        "ftsoManagerGasLimit",
+        "ftsoRewardExpiryOffsetDays",
+        "genesisGovernancePrivateKey",
+        "governanceExecutorPublicKey",
+        "governancePrivateKey",
+        "governancePublicKey",
+        "governanceSettingsAddress",
+        "governanceSettingsDeployerPrivateKey",
+        "governanceTimelock",
+        "highAssetThresholdUSDDec5",
+        "highAssetTurnoutThresholdBIPS",
+        "inflationGasLimit",
+        "inflationReceivers",
+        "inflationSharingBIPS",
+        "inflationStartDelaySeconds",
+        "inflationTopUpFactorsx100",
+        "inflationTopUpTypes",
+        "initialWnatPriceUSDDec5",
+        "lowAssetThresholdUSDDec5",
+        "lowNatTurnoutThresholdBIPS",
+        "maintainer",
+        "majorityConditionBIPS",
+        "maxVotePowerAssetThresholdFraction",
+        "maxVotePowerNatThresholdFraction",
+        "nativeElasticBandWidthPPM",
+        "nativeFtsoDecimals",
+        "nativeSymbol",
+        "priceDeviationThresholdBIPS",
+        "priceEpochCyclicBufferSize",
+        "priceEpochDurationSeconds",
+        "priceSubmitterAddress",
+        "proposalFeeValueNAT",
+        "proposers",
+        "removeAfterEligibleProposals",
+        "removeAfterNonParticipatingProposals",
+        "removeAfterNotRewardedEpochs",
+        "removeForDays",
+        "revealEpochDurationSeconds",
+        "rewardEpochDurationSeconds",
+        "rewardEpochsStartDelayPriceEpochs",
+        "rewardFeePercentageUpdateOffsetEpochs",
+        "scheduledInflationPercentageBIPS",
+        "stateConnectorAddress",
+        "thresholdConditionBIPS",
+        "totalExcludedSupplyNAT",
+        "totalNativeSupplyNAT",
+        "trustedAddresses",
+        "votePowerIntervalFraction",
+        "votingDelaySeconds",
+        "votingPeriodSeconds",
+        "wrappedNativeName",
+        "wrappedNativeSymbol"
+    ],
+    "type": "object"
+}
+

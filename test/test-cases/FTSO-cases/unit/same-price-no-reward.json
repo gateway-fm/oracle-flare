@@ -1,0 +1,7 @@
+{
+    "description": "Test same price with no reward weights",
+    "randomizedPivot": false,
+    "prices": [1e6,1e6,1e6,1e6,1e6,1e6,1e6,1e6],
+    "weightsNat": [2e5,3e5,4e5,1e5,0,0,0,0],
+    "weightsAsset": [0,0,0,0,5e5,2e5,3e5,1e5]
+}
