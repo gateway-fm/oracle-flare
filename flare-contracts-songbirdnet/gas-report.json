@@ -1,0 +1,70 @@
+[
+  {
+    "function": "transfer wNat where both sender and receiver have 0 delegates (by percentage)",
+    "gasUsed": 273973
+  },
+  {
+    "function": "transfer wNat where sender has 1 delegate and receiver has 0 delegates (by percentage)",
+    "gasUsed": 292092
+  },
+  {
+    "function": "transfer wNat where sender has 0 delegates and receiver has 1 delegate (by percentage)",
+    "gasUsed": 292098
+  },
+  {
+    "function": "transfer wNat where both sender and receiver have 1 delegate (by percentage)",
+    "gasUsed": 310218
+  },
+  {
+    "function": "transfer wNat where sender has 2 delegates and receiver has 0 delegates (by percentage)",
+    "gasUsed": 300840
+  },
+  {
+    "function": "transfer wNat where sender has 0 delegates and receiver has 2 delegates (by percentage)",
+    "gasUsed": 300846
+  },
+  {
+    "function": "transfer wNat where sender has 2 delegates and receiver has 1 delegate (by percentage)",
+    "gasUsed": 318966
+  },
+  {
+    "function": "transfer wNat where sender has 1 delegate and receiver has 2 delegates (by percentage)",
+    "gasUsed": 318966
+  },
+  {
+    "function": "transfer wNat where both sender and receiver have 2 delegates (by percentage)",
+    "gasUsed": 327714
+  },
+  {
+    "function": "initialize for reveal for single ftso",
+    "gasUsed": 331907
+  },
+  {
+    "function": "initialize for reveal for wNat ftso with 4 assets",
+    "gasUsed": 730574
+  },
+  {
+    "function": "submit price for single ftso",
+    "gasUsed": 76736
+  },
+  {
+    "function": "reveal price for single ftso",
+    "gasUsed": 214462
+  },
+  {
+    "function": "initialize for reveal for wNat ftso with 4 assets + 8 ftsos",
+    "gasUsed": 3587290
+  },
+  {
+    "function": "submit prices for wNat ftso with 4 assets + 8 ftsos",
+    "gasUsed": 355558
+  },
+  {
+    "function": "reveal prices for wNat ftso with 4 assets + 8 ftsos",
+    "gasUsed": 1471550
+  },
+  {
+    "function": "finalize price epoch for 100 submissions + 5 trusted providers",
+    "gasUsed": 2729729
+  }
+]

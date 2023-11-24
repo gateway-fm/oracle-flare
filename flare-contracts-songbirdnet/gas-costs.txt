@@ -1,0 +1,64 @@
+## METHODS
+ Avg gas  Min gas  Max gas Count   API (Contract)
+   39208    39208    39208     1   writeValueAt (CheckPointHistoryMock)
+   76740    71799    83329     7   writeValue (CheckPointHistoryMock)
+  122244   112644   131844     2   burnForAtNow (CheckPointableMock)
+  142526   131741   147919     6   mintForAtNow (CheckPointableMock)
+  132461   132461   132461     1   transmit (CheckPointableMock)
+   47730    47730    47730     1   transmitAt (CheckPointsByAddressMock)
+  113219   113219   113219     2   transmit (CheckPointsByAddressMock)
+   37492    37492    37492     1   writeValueOfAt (CheckPointsByAddressMock)
+   81036    72388    83918    16   writeValue (CheckPointsByAddressMock)
+  342949   342949   342949     1   burnVotePower (DelegatableMock)
+  272753   109523   341948    19   delegate (DelegatableMock)
+  330652   291648   343306    12   delegateExplicit (DelegatableMock)
+  116898    24956   377206    36   mintVotePower (DelegatableMock)
+  113704   113704   113704     1   revokeDelegationAt (DelegatableMock)
+  238390   128437   348342     2   transmitVotePower (DelegatableMock)
+  124727    59365   190089     2   undelegateAll (DelegatableMock)
+  129512    41674   153413     9   addReplaceDelegateByAmount (DelegationMock)
+  121359    33618   153616    15   addReplaceDelegateByPercent (DelegationMock)
+   46328    46328    46328     1   clear (DelegationMock)
+   29152    29152    29152     1   tryRemoveDelegate (DelegationMock)
+   44046    44046    44046     2   approve (DummyVPToken)
+   51106    51106    51106     2   transfer (DummyVPToken)
+  559251   297175  1185511    14   finalizePriceEpochWithResult (MockFtso)
+  139359   135023   195730    98   revealPrice (MockFtso)
+   45541    45531    45543   196   submitPrice (MockFtso)
+   42904    42904    42904     5   activate (RewardManager)
+   68229    68229    68229     1   addFtso (RewardManager)
+   33290    23736    38598     7   daemonize (RewardManager)
+  203835   203835   203835     3   burn (VPTokenMock)
+  174677   110565   342955     6   delegate (VPTokenMock)
+  344363   344363   344363     2   delegateExplicit (VPTokenMock)
+  243079   202062   256329    21   mint (VPTokenMock)
+  260705   260705   260705     2   transfer (VPTokenMock)
+   57508    57508    57508     1   undelegateAll (VPTokenMock)
+   77108    77108    77108     1   _burn (VotePowerMock)
+   84434    77154    85243    10   _mint (VotePowerMock)
+  200680   187738   203916     5   delegate (VotePowerMock)
+   77966    77966    77966     1   revokeAt (VotePowerMock)
+  140638   140638   140638     1   transmit (VotePowerMock)
+  187800   187800   187800     2   undelegate (VotePowerMock)
+  257207   257207   257207     7   deposit (WFLR)
+  265127   265127   265127     2   depositTo (WFLR)
+   45070    45070    45070     2   increaseAllowance (WFLR)
+  212758   212758   212758     3   withdraw (WFLR)
+  206467   206467   206467     2   withdrawFrom (WFLR)
+
+## DEPLOYMENTS
+ Avg gas  Min gas  Max gas Count   API (Contract)
+  398622   398622   398622     3   CheckPointHistoryMock
+  603355   603355   603355     3   CheckPointableMock
+  544817   544817   544817     7   CheckPointsByAddressMock
+ 2203985  2203985  2203985    22   DelegatableMock
+  746753   746753   746753    15   DelegationMock
+  961874   961874   961874     4   DummyVPToken
+  167761   167761   167761     2   FtsoMock
+  275675   275675   275675     7   InflationMock
+ 3043330  3043322  3043334   210   MockFtso
+  488176   217068  1285806    28   MockVPToken
+ 1700330  1700330  1700330     7   RewardManager
+ 3177119  3177119  3177119    15   VPTokenMock
+  843638   843638   843638    11   VotePowerMock
+ 3365281  3365281  3365281     7   WFLR

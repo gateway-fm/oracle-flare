@@ -1,0 +1,15 @@
+{
+    "description": "Random 50 prices and weights",
+    "randomizedPivot": true,
+    "randomizedDataCount": 50,
+    "randomizedRuns": 2,
+    "prices":       [],
+    "weightsNat":   [],
+    "weightsAsset": [],
+    "priceAverage": [75e6,76e6,77e6],
+    "priceSD": 100,
+    "weightNatAverage": 10000,
+    "weightNatSD": 5000,
+    "weightAssetAverage": 10000,
+    "weightAssetSD": 5000
+}

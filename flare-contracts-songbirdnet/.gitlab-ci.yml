@@ -1,0 +1,288 @@
+stages:
+  - build
+  - fuzzer
+  - coverage
+  - test
+
+variables:
+  YARN_CACHE_DIR: "$CI_PROJECT_DIR/.yarn-cache"
+
+
+include:
+  - template: Jobs/SAST.gitlab-ci.yml
+
+sast:
+  needs:
+  - job: run-tests
+    optional: true
+
+
+
+
+.rules:
+
+  always:
+    # branch pipelines
+    - if: '$CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS == null && $CI_PIPELINE_SOURCE == "web"'
+    - if: '$CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS == null'
+    # MR pipelines
+    - if: '$CI_OPEN_MERGE_REQUESTS != null && $CI_PIPELINE_SOURCE == "web"'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" || $CI_PIPELINE_SOURCE == "web"'
+    # Prevent duplicate MR && branch pipelines
+    - if: '$CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS'
+      when: never
+
+  manual-web_always:
+    # branch pipelines
+    - if: '$CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS == null && $CI_PIPELINE_SOURCE == "web"'
+    - if: '$CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS == null'
+      when: manual
+    # MR pipelines
+    - if: '$CI_OPEN_MERGE_REQUESTS != null && $CI_PIPELINE_SOURCE == "web"'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" || $CI_PIPELINE_SOURCE == "web"'
+      when: manual
+    # Prevent duplicate MR && branch pipelines
+    - if: '$CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS && $CI_PIPELINE_SOURCE != "web"'
+      when: never
+
+
+
+
+.run-on-selfhosted-runner:
+  tags:
+    - flarenetworks
+
+.test-node:
+  stage: test
+  image: node:18
+  timeout: 3h
+  rules:
+  - !reference [.rules, always]
+  cache:
+    - key:
+        files:
+          - yarn.lock
+      paths:
+        - .yarn-cache/
+        - node_modules/
+      policy: pull-push
+
+
+.test-node-sc:
+  extends: .test-node
+  variables:
+    DEPLOYER_PRIVATE_KEY: "0xc5e8f61d1ab959b397eecc0a37a6517b8e67a0e7cf1f4bce5591f3ed80199122"
+    GENESIS_GOVERNANCE_PRIVATE_KEY: "0x50777f5a3ce16445e63411bf1e865a2a11d5ca3c4cbc1de00808a52180bd8d3c"
+    GOVERNANCE_PRIVATE_KEY: "0xd49743deccbccc5dc7baa8e69e5be03298da8688a15dd202e20f15d5e0e9a9fb"
+    GOVERNANCE_PUBLIC_KEY: "0xeAD9C93b79Ae7C1591b1FB5323BD777E86e150d4"
+    GOVERNANCE_EXECUTOR_PUBLIC_KEY: "0xE5904695748fe4A84b40b3fc79De2277660BD1D3"
+  needs:
+    - build-smart-contracts
+    - job: run-tests
+      optional: true
+  dependencies:
+    - build-smart-contracts
+  before_script:
+    - yarn install --frozen-lockfile --cache-folder $YARN_CACHE_DIR
+
+
+run-tests:
+  stage: .pre
+  image: busybox
+  rules:
+  - !reference [.rules, manual-web_always]
+  script: [ "true" ]
+
+
+
+
+build-smart-contracts:
+  stage: build
+  needs: []
+  image: node:18
+  before_script:
+    - yarn install --frozen-lockfile --cache-folder $YARN_CACHE_DIR
+  script:
+    - yarn c
+  cache:
+    - key:
+        files:
+          - yarn.lock
+      paths:
+        - .yarn-cache/
+        - node_modules/
+      policy: pull-push
+  rules:
+  - !reference [coverage:schedule, rules]
+  - !reference [e2e-fuzzer:schedule, rules]
+  - !reference [.rules, manual-web_always]
+  artifacts:
+    paths:
+      - typechain
+      - typechain-truffle
+      - typechain-web3
+    expire_in: 1 week
+
+
+
+
+
+
+### Jobs
+test-scdev-daemon:
+  extends: .test-node-sc
+  image: timivesel/flare-scdev:1.0.1
+  script:
+    - yarn hardhat test --network scdev test/scdev/system/FlareDaemon.ts
+
+
+
+test-unit:
+  extends: .test-node-sc
+  parallel:
+    matrix:
+    - TEST_PATH:
+      - ./test/unit/addressUpdater
+      - ./test/unit/claiming
+      - ./test/unit/genesis
+      - ./test/unit/adversary
+      - ./test/unit/assetRegistry
+      - ./test/unit/Xasset
+      - ./test/unit/inflation
+      - ./test/unit/token
+      - ./test/unit/utils
+    - TEST_ARG:
+      - test/unit/gasReport/GasReport.ts
+  script:
+    - yarn hardhat test --network hardhat ${TEST_ARG}
+
+test-unit-heavy:
+  extends:
+    - test-unit
+  tags:
+    - flarenetwork-md
+  variables:
+    NODE_OPTIONS: "--max_old_space_size=6144"
+  retry:
+    when: script_failure
+    max: 2
+  parallel:
+    matrix:
+    - TEST_PATH:
+      - ./test/unit/ftso
+      - ./test/unit/tokenPools
+      - ./test/unit/governance
+
+
+
+test-linter:
+  extends: .test-node-sc
+  script:
+    - yarn lint
+        
+test-contract-integration:
+  extends: .test-node-sc
+  script:
+    - yarn test_integration_hh
+
+test-fuzzing-token:
+  extends: .test-node-sc
+  script:
+    - yarn test_fuzzing_token
+
+test-fuzzing-token-cleanup-block:
+  extends: .test-node-sc
+  variables:
+    CLEANUP_BLOCK: 1500
+    SET_CLEANUP_BLOCK_AT: 2100
+  script:
+    - yarn test_fuzzing_token
+
+test-fuzzing-token-repl-vpcontract:
+  extends: .test-node-sc
+  variables:
+    REPLACE_VPCONTRACT_AT: 1100
+    SPLIT_VPCONTRACTS_BLOCKS: 500
+  script:
+    - yarn test_fuzzing_token
+
+test-contract-performance:
+  extends: .test-node-sc
+  script:
+    - yarn test_performance_hh
+
+test-contract-end-to-end:
+  extends: .test-node-sc
+  script:
+    - yarn test_endtoend_hardhat
+
+test-contract-end-to-end_2:
+  extends:
+    - .test-node-sc
+  tags:
+    - flarenetwork-md
+  script:
+    - yarn test_claim_topup_hardhat_fast
+
+test-slither-check:
+  extends: .test-node-sc
+  before_script:
+    - apt update
+    - apt install -y python3-pip
+    - pip3 install --break-system-packages slither-analyzer
+    - yarn install --frozen-lockfile --cache-folder $YARN_CACHE_DIR
+  script:
+    - yarn slither
+  # artifacts:
+  #     when: always
+  #     name: "$CI_JOB_NAME"
+  #     paths:
+  #         - slither_badge.json
+  #     expire_in: 1 week
+
+test-onlyDetector:
+  extends: .test-node-sc
+  script:
+    - sh scripts/test-only.sh
+
+
+
+coverage:schedule:
+  extends:
+    - .run-on-selfhosted-runner
+    - .test-node-sc
+  stage: coverage
+  retry: 2
+  script:
+    - yarn cov
+  rules:
+  - if: '$CI_PIPELINE_SOURCE == "schedule" && $SCHEDULE_NAME == "coverage"'
+    when: always
+
+e2e-fuzzer:schedule:
+  extends:
+    - .run-on-selfhosted-runner
+    - .test-node-sc
+  stage: fuzzer
+  timeout: 4 hours
+  variables:
+    NODE_OPTIONS: "--max_old_space_size=6144"
+    LOOPS: 5000
+    N_PROVIDERS: 20
+    N_DELEGATORS: 10
+    BIG_JUMP_EVERY: 50
+    BIG_JUMP_SECONDS: 432000
+    MINING_BATCH_SIZE: 20
+    CHAIN_CONFIG: '{"defaultVoterWhitelistSize":25,"priceEpochDurationSeconds":180,"revealEpochDurationSeconds":90,"rewardEpochDurationSeconds":604800,"ftsoRewardExpiryOffsetDays":30}'
+  script:
+    - yarn test_fuzzing_endtoend
+  artifacts:
+    paths:
+      - test_logs/end-to-end-fuzzing.log
+    #   - e2e_fuzzer_badge.json
+    name: end-to-end-fuzzing
+    when: always
+    expire_in: 30 days
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule" && $SCHEDULE_NAME == "fuzzer"'
+      when: always

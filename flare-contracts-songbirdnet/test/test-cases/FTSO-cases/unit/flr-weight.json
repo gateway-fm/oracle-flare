@@ -1,0 +1,7 @@
+{
+    "description": "No low nat weights",
+    "randomizedPivot": false,
+    "prices":       [1e7,2e7,4e7,3e7,2e7,1e7,6e7,7e7,2e7,8e7],
+    "weightsNat":   [0,2e5,3e5,2e5,1e5,0,5e5,3e5,3e5,1e5],
+    "weightsAsset": [1e5,2e5,0,1e5,0,1e5,2e5,3e5,1e5,0]
+}

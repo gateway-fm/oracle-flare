@@ -1,0 +1,23 @@
+{{#ifHasContent typeName}}
+
+<div class="api-node-type" markdown>
+
+{{h}} {{typeTitle}}
+
+{{#each items}}
+{{#ifIsNodeType ../typeName}}
+{{#hsection}}
+
+<div class="api-node" markdown>
+
+{{>item}}
+
+</div>
+
+{{/hsection}}
+{{/ifIsNodeType}}
+{{/each}}
+
+</div>
+
+{{/ifHasContent}}
