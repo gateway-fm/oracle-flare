@@ -7,13 +7,14 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-func (c *client) SubscribeCoinAveragePrice(coins []string, id int, v chan *CoinAveragePriceStream) error {
+func (c *client) SubscribeCoinAveragePrice(coins []string, id int, frequencyMS int, v chan *CoinAveragePriceStream) error {
 	req := &CoinAveragePriceRequest{
 		ID:      id,
 		JSONRPC: "2.0",
 		Method:  "coin_average_price",
 		Params: &CoinAveragePriceParams{
-			Coins: coins,
+			Coins:       coins,
+			FrequencyMS: frequencyMS,
 		},
 	}
 

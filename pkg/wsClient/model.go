@@ -1,7 +1,8 @@
 package wsClient
 
 type CoinAveragePriceParams struct {
-	Coins []string `json:"coins"`
+	Coins       []string `json:"coins"`
+	FrequencyMS int      `json:"frequency_ms"`
 }
 
 type CoinAveragePriceRequest struct {

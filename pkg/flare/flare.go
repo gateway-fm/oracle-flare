@@ -2,6 +2,7 @@ package flare
 
 import (
 	"fmt"
+	"math/big"
 
 	"github.com/ethereum/go-ethereum/ethclient"
 
@@ -12,11 +13,15 @@ import (
 )
 
 type IFlare interface {
+	GetCurrentPriceEpochData() (*contracts.PriceEpochData, error)
+	CommitPrices(epochID *big.Int, indices []*big.Int, prices []*big.Int, random *big.Int) error
+	RevealPrices(epochID *big.Int, indices []*big.Int, prices []*big.Int, random *big.Int) error
 	Close()
 }
 
 type flare struct {
 	priceSubmitter contracts.IPriceSubmitter
+	ftsoManager    contracts.IFTSOManager
 	register       *registerContract
 	conf           *config.Flare
 	provider       *ethclient.Client
@@ -61,12 +66,31 @@ func (f *flare) init() {
 		logFatal(fmt.Sprintln("get submitter address error:", err.Error()), "Init")
 	}
 
+	ftsoAddress, err := f.register.getContractAddress("Ftso")
+	if err != nil {
+		logFatal(fmt.Sprintln("get ftsoManager address error:", err.Error()), "Init")
+	}
+
 	switch id {
 	case FlareChain:
 		f.priceSubmitter = flareChain.NewPriceSubmitter(f.provider, *submitterAddress)
+		f.ftsoManager = flareChain.NewFTSOManager(f.provider, *ftsoAddress)
 	case SongBirdChain:
 		f.priceSubmitter = songbirdChain.NewPriceSubmitter(f.provider, *submitterAddress)
+		f.ftsoManager = songbirdChain.NewFTSOManager(f.provider, *ftsoAddress)
 	}
+}
+
+func (f *flare) CommitPrices(epochID *big.Int, indices []*big.Int, prices []*big.Int, random *big.Int) error {
+	return f.priceSubmitter.CommitPrices(epochID, indices, prices, random)
+}
+
+func (f *flare) RevealPrices(epochID *big.Int, indices []*big.Int, prices []*big.Int, random *big.Int) error {
+	return f.priceSubmitter.RevealPrices(epochID, indices, prices, random)
+}
+
+func (f *flare) GetCurrentPriceEpochData() (*contracts.PriceEpochData, error) {
+	return f.ftsoManager.GetCurrentPriceEpochData()
 }
 
 func (f *flare) Close() {

@@ -11,7 +11,7 @@ import (
 )
 
 type IWSClient interface {
-	SubscribeCoinAveragePrice(coins []string, id int, v chan *CoinAveragePriceStream) error
+	SubscribeCoinAveragePrice(coins []string, id int, frequencyMS int, v chan *CoinAveragePriceStream) error
 	Close()
 }
 

@@ -27,7 +27,7 @@ func main() {
 		}
 	}()
 
-	if err := c.SubscribeCoinAveragePrice([]string{"ETH", "BTC"}, 1, stream); err != nil {
+	if err := c.SubscribeCoinAveragePrice([]string{"ETH", "BTC"}, 1, 1000, stream); err != nil {
 		log.Fatal(err)
 	}
 
