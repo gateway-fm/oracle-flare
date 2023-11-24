@@ -9,5 +9,5 @@ func init() {
 	// environment - could be "local", "prod", "dev"
 	viper.SetDefault("env", "prod")
 
-	// TODO add default values for all configuration fields
+	viper.SetDefault("ws.url", "wss://oracle.gateway.fm")
 }

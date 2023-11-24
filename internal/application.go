@@ -2,6 +2,7 @@ package internal
 
 import (
 	"fmt"
+	"oracle-flare/pkg/logger"
 	"os"
 	"os/signal"
 	"syscall"
@@ -18,8 +19,6 @@ type App struct {
 	config *config.Scheme
 
 	version *version.Version
-
-	// TODO add all needed dependencies
 }
 
 // NewApplication create new App instance
@@ -37,14 +36,11 @@ func NewApplication() (app *App, err error) {
 
 // Init initialize application and all necessary instances
 func (app *App) Init() error {
-	// TODO add dependencies initialisations
-
 	return nil
 }
 
 // Serve start serving Application service
 func (app *App) Serve() error {
-	// TODO add all runners that needed in separate goroutines
 
 	// Gracefully shutdown the server
 	quit := make(chan os.Signal, 1)
@@ -56,10 +52,8 @@ func (app *App) Serve() error {
 }
 
 // Stop shutdown the application
-func (app *App) Stop() error {
-	// TODO shutdown all dependencies that need to be stopped
-
-	return nil
+func (app *App) Stop() {
+	logger.Log().WithField("layer", "App").Info("app stop...")
 }
 
 // Config return App config Scheme

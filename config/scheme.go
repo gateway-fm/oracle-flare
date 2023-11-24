@@ -4,5 +4,10 @@ package config
 type Scheme struct {
 	// Env is the application environment.
 	Env string
-	// TODO add needed config params
+
+	WS *WS
+}
+
+type WS struct {
+	URL string
 }
