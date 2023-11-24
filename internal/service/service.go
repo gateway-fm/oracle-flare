@@ -1,6 +1,9 @@
 package service
 
-import "oracle-flare/pkg/wsClient"
+import (
+	"oracle-flare/pkg/flare"
+	"oracle-flare/pkg/wsClient"
+)
 
 type IService interface {
 	SendCoinAveragePrice()
@@ -8,12 +11,14 @@ type IService interface {
 }
 
 type service struct {
+	flare    flare.IFlare
 	wsClient wsClient.IWSClient
 }
 
-func NewService(ws wsClient.IWSClient) IService {
+func NewService(ws wsClient.IWSClient, flare flare.IFlare) IService {
 	c := &service{
 		wsClient: ws,
+		flare:    flare,
 	}
 
 	return c
@@ -22,5 +27,9 @@ func NewService(ws wsClient.IWSClient) IService {
 func (s *service) Close() {
 	if s.wsClient != nil {
 		s.wsClient.Close()
+	}
+
+	if s.flare != nil {
+		s.flare.Close()
 	}
 }

@@ -6,23 +6,20 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 
 	"oracle-flare/config"
-	"oracle-flare/pkg/flare/flareChain"
-	"oracle-flare/pkg/flare/songbirdChain"
+	"oracle-flare/pkg/flare/contracts"
+	"oracle-flare/pkg/flare/contracts/flareChain"
+	"oracle-flare/pkg/flare/contracts/songbirdChain"
 )
-
-type IContract interface {
-	//
-}
 
 type IFlare interface {
 	Close()
 }
 
 type flare struct {
-	contract IContract
-	register *registerContract
-	conf     *config.Flare
-	provider *ethclient.Client
+	priceSubmitter contracts.IPriceSubmitter
+	register       *registerContract
+	conf           *config.Flare
+	provider       *ethclient.Client
 }
 
 func NewFlare(conf *config.Flare) IFlare {
@@ -52,17 +49,28 @@ func (f *flare) init() {
 	}
 
 	f.provider = rpc
-	f.register = newRegisterContract(f.provider)
+
+	if f.conf.RegistryContractAddress == "" {
+		logFatal("no registry priceSubmitter found in the config", "Init")
+	}
+
+	f.register = newRegisterContract(f.provider, f.conf.RegistryContractAddress)
+
+	submitterAddress, err := f.register.getContractAddress("PriceSubmitter")
+	if err != nil {
+		logFatal(fmt.Sprintln("get submitter address error:", err.Error()), "Init")
+	}
 
 	switch id {
 	case FlareChain:
-		f.contract = flareChain.NewContract(f.provider)
+		f.priceSubmitter = flareChain.NewPriceSubmitter(f.provider, *submitterAddress)
 	case SongBirdChain:
-		f.contract = songbirdChain.NewContract(f.provider)
+		f.priceSubmitter = songbirdChain.NewPriceSubmitter(f.provider, *submitterAddress)
 	}
 }
 
 func (f *flare) Close() {
+	logInfo("close rpc provider connection...", "Close")
 	if f.provider != nil {
 		f.provider.Close()
 	}

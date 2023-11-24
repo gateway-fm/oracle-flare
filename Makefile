@@ -48,6 +48,10 @@ tidy:
 update:
 	go get -u ./...
 
+# The update-subtree-flare pulls flare contracts repository
+update-subtree-flare:
+	git subtree pull --prefix=flare-contracts https://gitlab.com/flarenetwork/flare-smart-contracts.git master --squash
+
 # The run target runs the application with race detection enabled
 run:
 	GODEBUG=xray_ptrace=1 go run -race $(APP_ENTRY_POINT) serve
@@ -55,6 +59,9 @@ run:
 # The build target builds the application for the current system
 build:
 	env CGO_ENABLED=0 GOOS=$(GOOS) GOARCH=$(GOARCH) go build -ldflags="-w -s ${LDFLAGS}" -o $(BUILD_OUT_DIR)/$(APP) $(APP_ENTRY_POINT)
+
+generate-registry-contract:
+	solc --abi ./flare-contracts/contracts/userInterfaces/IFlareContractRegistry.sol -o ./abis
 
 # The test target runs go test
 test:

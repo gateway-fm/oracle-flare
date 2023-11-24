@@ -10,6 +10,7 @@ import (
 
 	"oracle-flare/config"
 	"oracle-flare/internal/service"
+	"oracle-flare/pkg/flare"
 	"oracle-flare/pkg/wsClient"
 )
 
@@ -40,7 +41,8 @@ func NewApplication() (app *App, err error) {
 func (app *App) Init() error {
 
 	ws := wsClient.NewClient(app.config.WS)
-	app.srv = service.NewService(ws)
+	fl := flare.NewFlare(app.config.Flare)
+	app.srv = service.NewService(ws, fl)
 
 	return nil
 }
