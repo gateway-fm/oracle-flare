@@ -60,6 +60,9 @@ build:
 test:
 	go test ./...
 
+run-ws-example:
+	go run ./pkg/wsClient/example/wsClientExample.go
+
 # The clean target deletes the build output file
 clean:
 	rm $(BUILD_OUT_DIR)/$(APP)

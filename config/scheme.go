@@ -5,7 +5,14 @@ type Scheme struct {
 	// Env is the application environment.
 	Env string
 
-	WS *WS
+	WS    *WS
+	Flare *Flare
+}
+
+type Flare struct {
+	RegistryContractAddress string
+	RpcURL                  string
+	ChainID                 int
 }
 
 type WS struct {
