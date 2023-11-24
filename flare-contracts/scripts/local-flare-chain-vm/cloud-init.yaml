@@ -1,0 +1,32 @@
+#cloud-config
+package_update: true
+
+packages:
+ - curl
+ - jq
+ - build-essential
+
+runcmd:
+  - cd /home/ubuntu 
+  - wget -c https://dl.google.com/go/go1.14.13.linux-amd64.tar.gz -O - | sudo tar -xz -C /usr/local
+  - echo "export PATH=\"\$PATH:/usr/local/go/bin\"" >> .profile
+  - echo "export GOPATH=/home/ubuntu/go" >> .profile
+  - echo "export PATH=\"\$PATH:/usr/local/go/bin\"" >> /root/.profile
+  - echo "export XRP_APIs=\"https://xrpl.flare.network:443, https://xrplcluster.com\"" >> .profile
+  - echo "go build /home/ubuntu/flare-smart-contracts/scripts/local-flare-chain-vm/files/time-server.go && ./time-server" > /root/run-time-server.sh
+  - chmod u+x /root/run-time-server.sh
+  - cd /home/ubuntu
+  - export NVM_DIR=/home/ubuntu/.nvm 
+  - mkdir -p $NVM_DIR
+  - curl https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash
+  - echo "export NVM_DIR=\"/home/ubuntu/.nvm\"" >> .profile
+  - echo "[ -s \"\$NVM_DIR/nvm.sh\" ] && \\. \"\$NVM_DIR/nvm.sh\"" >> .profile
+  - echo "[ -s \"\$NVM_DIR/bash_completion\" ] && \\. \"\$NVM_DIR/bash_completion\"" >> .profile
+  - sudo chown -R ubuntu:ubuntu .nvm
+  - source /home/ubuntu/.profile
+  - su -c "nvm install 10.24.0" - ubuntu
+  - su -c "npm install --global yarn@1.22.10" - ubuntu
+  - su -c "git clone https://gitlab.com/flarenetwork/flare.git" - ubuntu
+  - echo "go build flare-smart-contracts/scripts/local-flare-chain-vm/files/time-server.go\nsudo ./time-server &\ncp flare-smart-contracts/scripts/local-flare-chain-vm/files/genesis_coston.go flare/fba-avalanche/avalanchego/genesis/\ncd flare\n./local.sh\ncd -" > launch.sh
+  - chown ubuntu:ubuntu launch.sh
+  - chmod u+x launch.sh

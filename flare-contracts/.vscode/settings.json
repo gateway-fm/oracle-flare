@@ -1,0 +1,46 @@
+{
+  "solidity.compileUsingRemoteVersion": "v0.7.6+commit.7338295f",
+  "[javascript]": {
+    "editor.tabSize": 2
+  },
+  "[typescript]": {
+    "editor.tabSize": 2
+  },
+  "[solidity]": {
+    "editor.tabSize": 4
+  },
+  "json.schemas": [
+    {
+      "fileMatch": [
+        "deployment/chain-config/*.json",
+        "!deployment/chain-config/chain-parameters.json",
+        "test/fuzzing/endtoend/fuzzing-chain-config.json"
+      ],
+      "url": "./deployment/chain-config/chain-parameters.json"
+    }
+  ],
+  "terminal.integrated.scrollback": 2000,
+  "slither.solcPath": "",
+  "slither.hiddenDetectors": [],
+  "workbench.colorCustomizations": {
+    "activityBar.activeBackground": "#9dd1a3",
+    "activityBar.activeBorder": "#857dc2",
+    "activityBar.background": "#9dd1a3",
+    "activityBar.foreground": "#15202b",
+    "activityBar.inactiveForeground": "#15202b99",
+    "activityBarBadge.background": "#857dc2",
+    "activityBarBadge.foreground": "#15202b",
+    "sash.hoverBorder": "#9dd1a3",
+    "statusBar.background": "#7ac183",
+    "statusBar.foreground": "#15202b",
+    "statusBarItem.hoverBackground": "#57b163",
+    "statusBarItem.remoteBackground": "#7ac183",
+    "statusBarItem.remoteForeground": "#15202b",
+    "titleBar.activeBackground": "#7ac183",
+    "titleBar.activeForeground": "#15202b",
+    "titleBar.inactiveBackground": "#7ac18399",
+    "titleBar.inactiveForeground": "#15202b99",
+    "commandCenter.border": "#15202b99"
+  },
+  "peacock.color": "#7ac183"
+}
