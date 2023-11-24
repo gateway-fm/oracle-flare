@@ -1,0 +1,7 @@
+{
+    "description": "Zero asset weights",
+    "randomizedPivot": false,
+    "prices":       [3e6,5e6,1e7,8e6],
+    "weightsNat":   [3e6,1e6,1e5,1e5],
+    "weightsAsset": [0,0,0,0]
+}

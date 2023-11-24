@@ -1,0 +1,86 @@
+### VisualStudioCode template
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# Typescript 
+dist
+typechain
+typechain-truffle
+typechain-web3
+
+# Testing
+test_logs
+accounts.json
+
+## Build generated
+build/
+bin/
+crytic-export/
+
+## Docs generated
+docs/api/
+
+## Node packages etc
+node_modules/
+.yarn-cache/
+.pip-cache/
+
+## code coverage files
+coverage.json
+.nyc_output/
+coverage/
+!test/coverage/
+
+## hardhat?
+artifacts/
+cache/
+
+## yarn
+yarn-error.log
+
+## npm package file
+package-lock.json
+
+## gas report
+.gas-report.txt
+gasReporterOutput.json
+
+## Fake multiplatform /dev/null. On Win `1> nul` does not create a file
+## On Unix systems it creates a file 
+nul
+
+## Flattened contracts
+flattened
+
+## Annoying .DS_Store on Mac
+.DS_Store
+
+## Test deploys info
+deployment/deploys/*
+!deployment/deploys/staging.json
+!deployment/deploys/flare.json
+
+## .env
+.env
+.idea
+
+## Slither working files
+slither.json
+slither_badge.json
+
+## linter working files
+solhint_badge.json
+e2e_fuzzer_badge.json
+fuzzer_token_badge.json
+
+## Tenderly 
+deployments
+
+## Airdrop transactions
+airdrop/files
+airdrop/flare/files
+airdrop/songbird/files
+/hardhat-link.config.ts
