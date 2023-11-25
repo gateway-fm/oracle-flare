@@ -13,6 +13,7 @@ import (
 	"oracle-flare/utils/contractUtils"
 )
 
+// ftsoManager is a FtsoManager songbird-net smart-contract struct, implementing contracts.IFTSOManager interface
 type ftsoManager struct {
 	address  common.Address
 	abi      *abi.ABI
@@ -20,6 +21,7 @@ type ftsoManager struct {
 	provider *ethclient.Client
 }
 
+// NewFTSOManager is used to get new ftsoManager instance
 func NewFTSOManager(provider *ethclient.Client, address common.Address) contracts.IFTSOManager {
 	c := &ftsoManager{
 		provider: provider,
@@ -31,6 +33,7 @@ func NewFTSOManager(provider *ethclient.Client, address common.Address) contract
 	return c
 }
 
+// init is used to create new smart-contract instance
 func (c *ftsoManager) init() {
 	abiI, contract, err := contractUtils.GetContract("./abis/songbird/IFtsoManager.abi", c.address, c.provider, c.provider)
 	if err != nil {
@@ -41,6 +44,7 @@ func (c *ftsoManager) init() {
 	c.contract = contract
 }
 
+// GetCurrentPriceEpochData is used to get and parse current epoch data
 func (c *ftsoManager) GetCurrentPriceEpochData() (*contracts.PriceEpochData, error) {
 	out := []interface{}{}
 

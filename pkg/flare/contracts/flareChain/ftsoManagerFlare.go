@@ -13,6 +13,7 @@ import (
 	"oracle-flare/utils/contractUtils"
 )
 
+// ftsoManager is a FtsoManager flare-net smart-contract struct, implementing contracts.IFTSOManager interface
 type ftsoManger struct {
 	address  common.Address
 	abi      *abi.ABI
@@ -20,6 +21,7 @@ type ftsoManger struct {
 	provider *ethclient.Client
 }
 
+// NewFTSOManager is used to get new ftsoManager instance
 func NewFTSOManager(provider *ethclient.Client, address common.Address) contracts.IFTSOManager {
 	c := &ftsoManger{
 		provider: provider,
@@ -31,6 +33,7 @@ func NewFTSOManager(provider *ethclient.Client, address common.Address) contract
 	return c
 }
 
+// init is used to create new smart-contract instance
 func (c *ftsoManger) init() {
 	abiI, contract, err := contractUtils.GetContract("./abis/flare/IFtsoManager.abi", c.address, c.provider, c.provider)
 	if err != nil {
@@ -41,6 +44,7 @@ func (c *ftsoManger) init() {
 	c.contract = contract
 }
 
+// GetCurrentPriceEpochData is used to get and parse current epoch data
 func (c *ftsoManger) GetCurrentPriceEpochData() (*contracts.PriceEpochData, error) {
 	out := []interface{}{}
 

@@ -14,6 +14,7 @@ import (
 	"oracle-flare/utils/contractUtils"
 )
 
+// priceSubmitter is a PriceSubmitter flare-net smart-contract struct, implementing contracts.IPriceSubmitter interface
 type priceSubmitter struct {
 	address  common.Address
 	abi      *abi.ABI
@@ -21,6 +22,7 @@ type priceSubmitter struct {
 	provider *ethclient.Client
 }
 
+// NewPriceSubmitter is used to get new priceSubmitter instance
 func NewPriceSubmitter(provider *ethclient.Client, address common.Address) contracts.IPriceSubmitter {
 	c := &priceSubmitter{
 		provider: provider,
@@ -32,6 +34,7 @@ func NewPriceSubmitter(provider *ethclient.Client, address common.Address) contr
 	return c
 }
 
+// init is used to create new smart-contract instance
 func (c *priceSubmitter) init() {
 	abiI, contract, err := contractUtils.GetContract("./abis/flare/IPriceSubmitter.abi", c.address, c.provider, c.provider)
 	if err != nil {
@@ -42,14 +45,16 @@ func (c *priceSubmitter) init() {
 	c.contract = contract
 }
 
-func (c *priceSubmitter) CommitPrices(epochID *big.Int, indices []*big.Int, prices []*big.Int, random *big.Int) error {
+// CommitPrices is used to hash and commit given data
+func (c *priceSubmitter) CommitPrices(epochID *big.Int, indices []contracts.TokenID, prices []*big.Int, random *big.Int) error {
 	//TODO: implement
 	log.Printf("received commit epoch:%v random:%v price:%v", epochID.Uint64(), random.Uint64(), prices[0].Uint64())
 
 	return nil
 }
 
-func (c *priceSubmitter) RevealPrices(epochID *big.Int, indices []*big.Int, prices []*big.Int, random *big.Int) error {
+// RevealPrices is used to reveal given data
+func (c *priceSubmitter) RevealPrices(epochID *big.Int, indices []contracts.TokenID, prices []*big.Int, random *big.Int) error {
 	//TODO: implement
 	log.Printf("received reveal epoch:%v random:%v price:%v", epochID.Uint64(), random.Uint64(), prices[0].Uint64())
 

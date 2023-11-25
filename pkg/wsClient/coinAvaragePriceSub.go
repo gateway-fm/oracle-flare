@@ -7,6 +7,7 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+// SubscribeCoinAveragePrice is used to send subscribe msg for the prc coin_average_price method
 func (c *client) SubscribeCoinAveragePrice(coins []string, id int, frequencyMS int, v chan *CoinAveragePriceStream) error {
 	logInfo(fmt.Sprintln("subscribing on coins:", coins), "SubscribeCoinAveragePrice")
 	req := &CoinAveragePriceRequest{
@@ -30,7 +31,9 @@ func (c *client) SubscribeCoinAveragePrice(coins []string, id int, frequencyMS i
 		return err
 	}
 
+	c.mu.Lock()
 	c.streams[id] = v
+	c.mu.Unlock()
 
 	return nil
 }

@@ -1,5 +1,6 @@
 package flare
 
+// ChainID is a chain id type
 type ChainID int
 
 const (
@@ -20,6 +21,7 @@ var ChainIDInts = [...]int{
 	SongBirdChain: 19,
 }
 
+// ChainIDFromInt is used to get chain id from the given int
 func ChainIDFromInt(id int) ChainID {
 	switch id {
 	case 14:
@@ -31,10 +33,12 @@ func ChainIDFromInt(id int) ChainID {
 	}
 }
 
+// String is used to get ChainID string value
 func (i ChainID) String() string {
 	return ChainIDStrings[i]
 }
 
+// ID is used to get ChainID int value
 func (i ChainID) ID() int {
 	return ChainIDInts[i]
 }

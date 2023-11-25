@@ -11,6 +11,7 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 )
 
+// GetContract is a utils that is used to get abi and contract instances from given config data
 func GetContract(abiPath string, address common.Address, reader *ethclient.Client, writer *ethclient.Client) (
 	*abi.ABI, *bind.BoundContract, error,
 ) {

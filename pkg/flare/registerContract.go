@@ -11,6 +11,7 @@ import (
 	"oracle-flare/utils/contractUtils"
 )
 
+// registerContract is a register smart-contract. It has the same ABI and address for all flare chains
 type registerContract struct {
 	address  common.Address
 	abi      *abi.ABI
@@ -18,6 +19,7 @@ type registerContract struct {
 	provider *ethclient.Client
 }
 
+// newRegisterContract is used to get new registerContract instance
 func newRegisterContract(provider *ethclient.Client, address string) *registerContract {
 	c := &registerContract{
 		provider: provider,
@@ -29,6 +31,7 @@ func newRegisterContract(provider *ethclient.Client, address string) *registerCo
 	return c
 }
 
+// getContractAddress is used to get contract address by given contract name
 func (c *registerContract) getContractAddress(name string) (*common.Address, error) {
 	out := []interface{}{}
 
@@ -41,10 +44,11 @@ func (c *registerContract) getContractAddress(name string) (*common.Address, err
 	return &out0, nil
 }
 
+// init is used to init the registerContract
 func (c *registerContract) init() {
 	abiI, contract, err := contractUtils.GetContract("./abis/IFlareContractRegistry.abi", c.address, c.provider, c.provider)
 	if err != nil {
-		logFatal(fmt.Sprintln("err get registry priceSubmitter:", err.Error()), "Init")
+		logFatal(fmt.Sprintln("err get contract register:", err.Error()), "Init")
 	}
 
 	c.abi = abiI

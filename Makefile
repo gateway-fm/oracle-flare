@@ -76,6 +76,14 @@ generate-ftso-contract-songbirdnet:
 generate-ftso-contract-flarenet:
 	solc --abi ./flare-contracts-flarenet/contracts/userInterfaces/IFtsoManager.sol -o ./abis/flare
 
+# The generate-ftso-contract-songbirdnet generates abi file for FtsoRegistry smart-contract on the songbird net
+generate-ftso-registry-songbirdnet:
+	solc --abi ./flare-contracts-songbirdnet/contracts/userInterfaces/IFtsoRegistry.sol -o ./abis/songbird
+
+# The generate-ftso-contract-flarenet generates abi file for FtsoRegistry smart-contract on the flare net
+generate-ftso-registry-flarenet:
+	solc --abi ./flare-contracts-flarenet/contracts/userInterfaces/IFtsoRegistry.sol -o ./abis/flare
+
 # The generate-submitter-contract-songbirdnet generates abi file for PriceSumbmitter smart-contract on the songbird net
 generate-submitter-contract-songbirdnet:
 	solc --abi ./flare-contracts-songbirdnet/contracts/userInterfaces/IPriceSubmitter.sol -o ./abis/songbird
