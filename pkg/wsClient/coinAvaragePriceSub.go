@@ -7,13 +7,16 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-func (c *client) SubscribeCoinAveragePrice(coins []string, id int, v chan *CoinAveragePriceStream) error {
+// SubscribeCoinAveragePrice is used to send subscribe msg for the prc coin_average_price method
+func (c *client) SubscribeCoinAveragePrice(coins []string, id int, frequencyMS int, v chan *CoinAveragePriceStream) error {
+	logInfo(fmt.Sprintln("subscribing on coins:", coins), "SubscribeCoinAveragePrice")
 	req := &CoinAveragePriceRequest{
 		ID:      id,
 		JSONRPC: "2.0",
 		Method:  "coin_average_price",
 		Params: &CoinAveragePriceParams{
-			Coins: coins,
+			Coins:       coins,
+			FrequencyMS: frequencyMS,
 		},
 	}
 
@@ -28,7 +31,9 @@ func (c *client) SubscribeCoinAveragePrice(coins []string, id int, v chan *CoinA
 		return err
 	}
 
+	c.mu.Lock()
 	c.streams[id] = v
+	c.mu.Unlock()
 
 	return nil
 }

@@ -1,0 +1,7 @@
+{
+    "description": "Test with 1",
+    "randomizedPivot": false,
+    "prices": [1e5],
+    "weightsNat": [1e5],
+    "weightsAsset": [1e5]
+}

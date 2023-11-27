@@ -48,6 +48,18 @@ tidy:
 update:
 	go get -u ./...
 
+# The update-subtree-flare pulls flare contracts repository
+update-subtree-flare:
+	git subtree pull --prefix=flare-contracts https://gitlab.com/flarenetwork/flare-smart-contracts.git master --squash
+
+# The update-subtree-flare-flarenet pull flare contracts repository on flare_network_deployed_code branch
+update-subtree-flare-flarenet:
+	git subtree pull --prefix=flare-contracts-flarenet https://gitlab.com/flarenetwork/flare-smart-contracts.git flare_network_deployed_code --squash
+
+# The update-subtree-flare-songbirdnet pull flare contracts repository on songbird_network_deployed_code branch
+update-subtree-flare-songbirdnet:
+	git subtree pull --prefix=flare-contracts-songbirdnet https://gitlab.com/flarenetwork/flare-smart-contracts.git songbird_network_deployed_code --squash
+
 # The run target runs the application with race detection enabled
 run:
 	GODEBUG=xray_ptrace=1 go run -race $(APP_ENTRY_POINT) serve
@@ -56,9 +68,40 @@ run:
 build:
 	env CGO_ENABLED=0 GOOS=$(GOOS) GOARCH=$(GOARCH) go build -ldflags="-w -s ${LDFLAGS}" -o $(BUILD_OUT_DIR)/$(APP) $(APP_ENTRY_POINT)
 
+# The generate-ftso-contract-songbirdnet generates abi file for FtsoManager smart-contract on the songbird net
+generate-ftso-contract-songbirdnet:
+	solc --abi ./flare-contracts-songbirdnet/contracts/userInterfaces/IFtsoManager.sol -o ./abis/songbird
+
+# The generate-ftso-contract-flarenet generates abi file for FtsoManager smart-contract on the flare net
+generate-ftso-contract-flarenet:
+	solc --abi ./flare-contracts-flarenet/contracts/userInterfaces/IFtsoManager.sol -o ./abis/flare
+
+# The generate-ftso-contract-songbirdnet generates abi file for FtsoRegistry smart-contract on the songbird net
+generate-ftso-registry-songbirdnet:
+	solc --abi ./flare-contracts-songbirdnet/contracts/userInterfaces/IFtsoRegistry.sol -o ./abis/songbird
+
+# The generate-ftso-contract-flarenet generates abi file for FtsoRegistry smart-contract on the flare net
+generate-ftso-registry-flarenet:
+	solc --abi ./flare-contracts-flarenet/contracts/userInterfaces/IFtsoRegistry.sol -o ./abis/flare
+
+# The generate-submitter-contract-songbirdnet generates abi file for PriceSumbmitter smart-contract on the songbird net
+generate-submitter-contract-songbirdnet:
+	solc --abi ./flare-contracts-songbirdnet/contracts/userInterfaces/IPriceSubmitter.sol -o ./abis/songbird
+
+# The generate-submitter-contract-flarenet generates abi file for PriceSumbmitter smart-contract on the flare net
+generate-submitter-contract-flarenet:
+	solc --abi ./flare-contracts-flarenet/contracts/userInterfaces/IPriceSubmitter.sol -o ./abis/flare
+
+# The generate-registry-contract generates abi file for ContractRegistry smart-contract
+generate-registry-contract:
+	solc --abi ./flare-contracts/contracts/userInterfaces/IFlareContractRegistry.sol -o ./abis
+
 # The test target runs go test
 test:
 	go test ./...
+
+run-ws-example:
+	go run ./pkg/wsClient/example/wsClientExample.go
 
 # The clean target deletes the build output file
 clean:

@@ -21,7 +21,6 @@ func main() {
 		logger.Log().Infof("An error occurred: %s", err.Error())
 		os.Exit(1)
 	}
-	defer app.Stop()
 
 	rootCmd := root.Cmd(app)
 	rootCmd.AddCommand(serve.Cmd(app))

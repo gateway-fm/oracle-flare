@@ -2,7 +2,6 @@ package internal
 
 import (
 	"fmt"
-	"oracle-flare/pkg/logger"
 	"os"
 	"os/signal"
 	"syscall"
@@ -10,6 +9,9 @@ import (
 	version "github.com/misnaged/annales/versioner"
 
 	"oracle-flare/config"
+	"oracle-flare/internal/service"
+	"oracle-flare/pkg/flare"
+	"oracle-flare/pkg/wsClient"
 )
 
 // App is main microservice application instance that
@@ -18,6 +20,7 @@ type App struct {
 	// application configuration
 	config *config.Scheme
 
+	srv     service.IService
 	version *version.Version
 }
 
@@ -36,11 +39,17 @@ func NewApplication() (app *App, err error) {
 
 // Init initialize application and all necessary instances
 func (app *App) Init() error {
+
+	ws := wsClient.NewClient(app.config.WS)
+	fl := flare.NewFlare(app.config.Flare)
+	app.srv = service.NewService(ws, fl)
+
 	return nil
 }
 
 // Serve start serving Application service
 func (app *App) Serve() error {
+	go app.srv.SendCoinAveragePrice()
 
 	// Gracefully shutdown the server
 	quit := make(chan os.Signal, 1)
@@ -48,12 +57,16 @@ func (app *App) Serve() error {
 
 	<-quit
 
+	app.Stop()
 	return nil
 }
 
 // Stop shutdown the application
 func (app *App) Stop() {
-	logger.Log().WithField("layer", "App").Info("app stop...")
+	logInfo("app stop...", "Stop")
+	if app.srv != nil {
+		app.srv.Close()
+	}
 }
 
 // Config return App config Scheme

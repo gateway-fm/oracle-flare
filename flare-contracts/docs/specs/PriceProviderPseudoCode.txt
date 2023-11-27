@@ -1,0 +1,114 @@
+const BobAddress;
+const providerAddress; // price provider address
+
+// below values should be obtained from deployment json file
+const wNat; //token contract
+const priceEpochDurationSeconds;
+const ftsoRegistry = priceSubmitter.getFtsoRegistry();
+const voterWhitelister = priceSubmitter.getVoterWhitelister();
+const FtsoIndexList { // get ftso indices for the desired symbols
+    ftsoRegistry.getFtsoIndex("XRP"), ftsoRegistry.getFtsoIndex("TLC"), ftsoRegistry.getFtsoIndex("XDG")
+};
+// ftsoRegistry.getSupportedSymbolsAndFtsos() can be used to return all available symbols and corresponding ftsos
+
+// preliminary steps of wrapping native token and delegating vote power.
+// these steps will usually be done in a different scope
+/////////////////////////////////////////////////////////////////
+// Bob wrapps 100 native tokens
+wNat.deposit(){from: BobAddress, amount: 100};
+// Bob delegates 100% of his vote power to a price provider
+wNat.delegate(providerAddress, percentToBips(100)){from: BobAddress};
+// price provider steps
+///////////////////////
+main() {
+
+    // First try to whitelist on all available ftsos
+    voterWhitelister.requestFullVoterWhitelisting(providerAddress);
+    uint step = 0;
+
+    while (true) {
+ 
+        let providerVotePower;
+        let validFtsoIndexList[];
+        let ftsoPrices[];
+
+        let voterMap = priceSubmitter.voterWhitelistBitmap();
+
+        for (uint i = 0; i < FtsoIndexList.length; i++) { 
+
+            uint ftsoIndex = FtsoIndexList[i];
+            // Do not vote on ftsos we don't have an access to
+            if(voterMap & (1 << ftsoIndex) == 0){
+                continue;
+            }
+
+            address ftso = ftsoRegistry.getFtso(ftsoIndex);
+
+            {
+                epochId;
+                epochSubmitEndTime;
+                epochRevealEndTime;
+                votePowerBlock;
+                isFallbackMode;
+            } = ftso.getPriceEpochData();
+    
+            validFtsoIndexList.push(FtsoIndexList[i]);
+    
+            // read token symbol
+            let symbol = ftso.symbol();
+    
+            // read price from any chosen price source provider wishes to use
+            ftsoPrices.push(priceSource.getPrice(symbol));
+        }
+
+        let random = rand();
+        let hash = solidityKeccak256(
+                ["uint256[]", "uint256[]", "uint256", "address"],
+                [validFtsoIndexList, ftsoPrices, random, providerAddress]
+ 
+        // submit hashes in batch
+        if (validFtsoIndexList.length > 0) {
+            priceSubmitter.submitHash(epochId, hash);
+        }
+ 
+        // wait for this commit period to end
+        waitUntil(epochSubmitEndTime);
+ 
+        // send reveal batch
+        if (validFtsoIndexList.length > 0) {
+            priceSubmitter.revealPrices(
+                epochId,
+                validFtsoIndexList,
+                ftsoPrices,
+                random
+            );
+        }
+
+
+        // Rewhitelist demo
+        // This will usually be done in a different scope (when more native token is delegated, when whitelister emits an event...)
+        ++step;
+        // Try to rewhitelist every 100 epochs
+        if(step % 100 == 0){
+            for (uint i = 0; i < FtsoIndexList.length; i++) { 
+                uint ftsoIndex = FtsoIndexList[i];
+                // Rewhitelist only on unavailable
+                if(voterMap & (1 << ftsoIndex) == 0){
+                    voterWhitelister.requestWhitelistingVoter(providerAddress, ftsoIndex);
+                }
+            }
+        }
+
+    }
+}
+ 
+function percentToBips(percent) {
+    return percent * 100;
+}
+
+function waitUntil(linuxTs) {
+    while(now() < linuxTs) {
+        // sleep 1 second
+        sleep(1);
+    }
+}

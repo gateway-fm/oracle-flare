@@ -1,0 +1,91 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+
+
+    {
+      "type": "pwa-node",
+      "request": "launch",
+      "name": "E2E fuzzer",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "program": "${workspaceFolder}/test/fuzzing/endtoend/EndToEndFuzzing.ts",
+      "outFiles": [
+        "${workspaceFolder}/**/*.js"
+      ]
+    },
+
+    {
+      "type": "pwa-node",
+      "request": "launch",
+      "name": "Mocha testi",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "program": "yarn harhat test test/airdrop/testUtils.ts",
+      "outFiles": [
+        "${workspaceFolder}/**/*.js"
+      ]
+    },
+
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Create Airdrop Transactions",
+      "runtimeExecutable": "yarn",
+      "runtimeArgs": ["ts-node", "-r", "dotenv/config", "airdrop/flare/createAirdropTransactions.ts",
+        "--snapshot-file", "airdrop/flare/data/export.csv", 
+        "--transaction-file", "airdrop/flare/files/trans/unsigned_call_transactions.json",
+        "--override", 
+        "-h", "true",
+        "-i", "19",
+        "--deployment-name", "deployment/deploys/flare.json",
+        "--deployment-config", "deployment/chain-config/flare.json"
+      ]
+   },
+
+   {
+    "type": "node",
+    "request": "launch",
+    "name": "Sign Airdrop Transactions",
+    "runtimeExecutable": "yarn",
+    "runtimeArgs": ["ts-node", "-r", "dotenv/config", "airdrop/flare/signAirdropTransactions.ts",
+      "-f", "airdrop/flare/files/trans/unsigned_call_transactions.json",
+      "-o", "airdrop/flare/files/trans/signed_call_transactions.json"
+    ]
+ },
+
+ {
+  "type": "node",
+  "request": "launch",
+  "name": "Send Airdrop Transactions",
+  "runtimeExecutable": "yarn",
+  "runtimeArgs": ["ts-node", "-r", "dotenv/config", "airdrop/flare/sendAirdropTransactions.ts",
+    "-f", "airdrop/flare/files/trans/signed_call_transactions.json",
+    "-q", "false"
+  ]
+},
+
+{
+  "type": "node",
+  "request": "launch",
+  "name": "All in One",
+  "runtimeExecutable": "yarn",
+  "runtimeArgs": ["ts-node", "-r", "dotenv/config", "airdrop/flare/allInOne.ts",
+    "--snapshot-file", "airdrop/flare/data/export.csv", 
+    "--transaction-file", "airdrop/flare/files/trans/unsigned_call_transactions.json",
+    "--override", 
+    "-h", "true",
+    "-i", "19",
+    "--deployment-name", "deployment/deploys/flare.json",
+    "-a", "1662016953",
+    "-b", "1663226553"
+  ]
+},
+
+  ]
+}
