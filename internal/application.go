@@ -21,6 +21,8 @@ type App struct {
 	// application configuration
 	config *config.Scheme
 
+	ws      wsClient.IWSClient
+	fl      flare.IFlare
 	srv     service.IService
 	version *version.Version
 }
@@ -41,17 +43,17 @@ func NewApplication() (app *App, err error) {
 // Init initialize application and all necessary instances
 func (app *App) Init() error {
 
-	ws := wsClient.NewClient(app.config.WS)
-	fl := flare.NewFlare(app.config.Flare)
-	app.srv = service.NewService(ws, fl)
+	app.ws = wsClient.NewClient(app.config.WS)
+	app.fl = flare.NewFlare(app.config.Flare)
+	app.srv = service.NewService(app.ws, app.fl)
 
 	return nil
 }
 
 // InitForWhiteList initialize application and all necessary instances for whitelist command
 func (app *App) InitForWhiteList() error {
-	fl := flare.NewFlare(app.config.Flare)
-	app.srv = service.NewService(nil, fl)
+	app.fl = flare.NewFlare(app.config.Flare)
+	app.srv = service.NewService(nil, app.fl)
 
 	return nil
 }
@@ -93,6 +95,14 @@ func (app *App) Stop() {
 	logInfo("app stop...", "Stop")
 	if app.srv != nil {
 		app.srv.Close()
+	}
+
+	if app.fl != nil {
+		app.fl.Close()
+	}
+
+	if app.ws != nil {
+		app.ws.Close()
 	}
 }
 

@@ -52,14 +52,6 @@ func NewService(ws wsClient.IWSClient, flare flare.IFlare) IService {
 func (s *service) Close() {
 	logInfo("service closing...", "Close")
 	close(s.stopAll)
-
-	if s.wsClient != nil {
-		s.wsClient.Close()
-	}
-
-	if s.flare != nil {
-		s.flare.Close()
-	}
 }
 
 // getNextID is used to update nextID arg and return it
