@@ -20,4 +20,4 @@ __debug_bin
 
 oracle-flare
 
-# TODO: add any required ignore patterns here
+.env

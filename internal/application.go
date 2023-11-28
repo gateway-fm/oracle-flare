@@ -2,6 +2,7 @@ package internal
 
 import (
 	"fmt"
+	"oracle-flare/pkg/flare/contracts"
 	"os"
 	"os/signal"
 	"syscall"
@@ -47,9 +48,35 @@ func (app *App) Init() error {
 	return nil
 }
 
+// InitForWhiteList initialize application and all necessary instances for whitelist command
+func (app *App) InitForWhiteList() error {
+	fl := flare.NewFlare(app.config.Flare)
+	app.srv = service.NewService(nil, fl)
+
+	return nil
+}
+
+// WhiteListAddress is used to run for whitelist command
+func (app *App) WhiteListAddress(address string, token string) error {
+	ok, err := app.srv.WhiteListAddress(address, token)
+	if err != nil {
+		app.Stop()
+		return err
+	}
+
+	if ok {
+		logInfo(fmt.Sprintf("address: %s for %s whitelisted successfully", address, token), "WhiteListAddress")
+	} else {
+		logWarn(fmt.Sprintf("address: %s for %s whitelisted unsuccessfully", address, token), "WhiteListAddress")
+	}
+
+	app.Stop()
+	return nil
+}
+
 // Serve start serving Application service
 func (app *App) Serve() error {
-	go app.srv.SendCoinAveragePrice()
+	go app.srv.SendCoinAveragePrice(contracts.ETH)
 
 	// Gracefully shutdown the server
 	quit := make(chan os.Signal, 1)

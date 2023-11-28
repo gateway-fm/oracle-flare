@@ -1,8 +1,9 @@
 package service
 
 import (
+	"crypto/rand"
 	"math/big"
-	"math/rand"
+	"oracle-flare/pkg/flare/contracts"
 
 	"oracle-flare/pkg/flare"
 	"oracle-flare/pkg/wsClient"
@@ -10,8 +11,10 @@ import (
 
 // IService is a service layer interface
 type IService interface {
+	// WhiteListAddress is used to add address to the smart-contract whitelist with given token
+	WhiteListAddress(addressS string, indexS string) (bool, error)
 	// SendCoinAveragePrice is used to send coin average price from the ws service to the flare smart-contracts
-	SendCoinAveragePrice()
+	SendCoinAveragePrice(token contracts.TokenID)
 	// Close is used to stop the service
 	Close()
 }
@@ -67,11 +70,12 @@ func (s *service) getNextID() int {
 
 // getRandom is used to update random arg and return it
 func (s *service) getRandom() *big.Int {
-	random := rand.Uint64()
-	randomBig := new(big.Int)
-	randomBig.SetUint64(random)
+	random, err := rand.Prime(rand.Reader, 130)
+	if err != nil {
+		return s.getRandom()
+	}
 
-	s.random = randomBig
+	s.random = random
 
-	return randomBig
+	return random
 }

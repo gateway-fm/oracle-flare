@@ -18,12 +18,12 @@ func Log() *logger {
 	once.Do(func() {
 		log := logrus.New()
 
-		log.SetLevel(logrus.InfoLevel)
+		log.SetLevel(logrus.DebugLevel)
 
 		log.SetOutput(os.Stdout)
 		log.SetFormatter(&easy.Formatter{
 			TimestampFormat: "2006-01-02 15:04",
-			LogFormat:       "[%lvl%]: %time% - InfinexMarkets-%layer%: %msg%\n",
+			LogFormat:       "[%lvl%]: %time% - OracleFlare-%layer%: %msg%\n",
 		})
 
 		instance = &logger{log}

@@ -1,6 +1,10 @@
 package contracts
 
-import "math/big"
+import (
+	"math/big"
+
+	"github.com/ethereum/go-ethereum/common"
+)
 
 // IPriceSubmitter is an interface for the PriceSubmitter smart-contract
 type IPriceSubmitter interface {
@@ -20,4 +24,12 @@ type IFTSOManager interface {
 type IFTSORegistry interface {
 	// GetSupportedIndicesAndSymbols is used to get supported indices and symbols
 	GetSupportedIndicesAndSymbols() (*IndicesAndSymbols, error)
+}
+
+// IVoterWhiteLister is an interface for VoterWhiteLister smart-contract
+type IVoterWhiteLister interface {
+	// RequestWhitelistingVoter is used to whitelist given address as a data-provider for given token ID
+	RequestWhitelistingVoter(address common.Address, index TokenID) error
+	// GetFtsoWhitelistedPriceProviders is used to get all data-providers for given token ID
+	GetFtsoWhitelistedPriceProviders(index TokenID) ([]common.Address, error)
 }

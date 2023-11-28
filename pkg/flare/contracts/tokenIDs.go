@@ -1,6 +1,8 @@
 package contracts
 
-import "math/big"
+import (
+	"math/big"
+)
 
 // TokenID is a flare token id type
 type TokenID int
@@ -10,7 +12,14 @@ const (
 	ETH
 )
 
-var TokenIDStrings = [...]string{
+// TokenIDWSNames are the names for WS service
+var TokenIDWSNames = [...]string{
+	UnknownToken: "UnknownToken",
+	ETH:          "ETH",
+}
+
+// TokenIDSymbol are the names for smart-contract. Filled on init depends on the chain ID
+var TokenIDSymbol = [...]string{
 	UnknownToken: "UnknownToken",
 	ETH:          "ETH",
 }
@@ -20,29 +29,48 @@ var TokenIDIndices = []*big.Int{
 	ETH:          big.NewInt(-1),
 }
 
-// FillTokenIDs is used to fill the TokenIDIndices with on-chain values
-func FillTokenIDs(data *IndicesAndSymbols) {
+// FillTokenIDAndNames is used to fill the TokenIDIndices with on-chain values and names depend on the chain id
+func FillTokenIDAndNames(data *IndicesAndSymbols, isTestNet bool) {
+	if isTestNet {
+		TokenIDSymbol[ETH] = "testETH"
+	}
+
 	for i, s := range data.Symbols {
-		id := GetTokenIDFromString(s)
+		id := GetTokenIDFromSymbol(s)
 		if id != UnknownToken {
 			TokenIDIndices[id] = data.Indices[i]
 		}
 	}
 }
 
-// GetTokenIDFromString is used to parse string to the TokenID
-func GetTokenIDFromString(s string) TokenID {
+// GetTokenIDFromName is used to parse string to the TokenID from given WS name
+func GetTokenIDFromName(s string) TokenID {
 	switch s {
-	case "ETH":
+	case ETH.Name():
 		return ETH
 	default:
 		return UnknownToken
 	}
 }
 
-// Symbol is used to get TokenID string value
+// GetTokenIDFromSymbol is used to parse string to the TokenID from given smart-contract symbol
+func GetTokenIDFromSymbol(s string) TokenID {
+	switch s {
+	case ETH.Symbol():
+		return ETH
+	default:
+		return UnknownToken
+	}
+}
+
+// Name is used to get TokenID string value for the WS service
+func (i TokenID) Name() string {
+	return TokenIDWSNames[i]
+}
+
+// Symbol is used to get TokenID string value for the smart-contract
 func (i TokenID) Symbol() string {
-	return TokenIDStrings[i]
+	return TokenIDSymbol[i]
 }
 
 // Index is used to get TokenID flare index

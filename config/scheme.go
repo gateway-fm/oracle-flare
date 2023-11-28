@@ -15,8 +15,10 @@ type Flare struct {
 	RegistryContractAddress string
 	// RpcURL url for rpc-provider
 	RpcURL string
-	// ChainID for flare smart-contracts. Only 19 (songbird testnet) and 14 (flare mainnet) are supported
+	// ChainID for flare smart-contracts. Only 19 (songbird testnet), 16 (coston2 testnet) and 14 (flare mainnet) are supported
 	ChainID int
+	// SignerPK is a wallet private key. Shall never be hardcoded
+	SignerPK string
 }
 
 // WS is a pkg ws client configs

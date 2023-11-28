@@ -10,16 +10,24 @@ import (
 )
 
 // SendCoinAveragePrice is used to subscribe on the avg price and send results to the flare smart contracts
-func (s *service) SendCoinAveragePrice() {
+func (s *service) SendCoinAveragePrice(token contracts.TokenID) {
 	stream := make(chan *wsClient.CoinAveragePriceStream)
 	id := s.getNextID()
 	stop := make(chan struct{})
 	s.stopChans[id] = stop
 
+	epoch, err := s.flare.GetCurrentPriceEpochData()
+	if err != nil {
+		logErr(fmt.Sprintln("err get epoch:", err.Error()), "listenAndSendARGPrice")
+	}
+
+	dur := epoch.EndTimestamp.Uint64() - epoch.CurrentTimestamp.Uint64()
+	logDebug(fmt.Sprintf("end epoch in %v seconds", dur), "SendCoinAveragePrice")
+
 	go s.listenAndSendARGPrice(stream, stop)
 
 	// price symbols should be set here. Check if symbols are supported in the pkg-flare-contracts-tokenIDs
-	if err := s.wsClient.SubscribeCoinAveragePrice([]string{"ETH"}, id, 180000, stream); err != nil {
+	if err := s.wsClient.SubscribeCoinAveragePrice([]string{token.Name()}, id, 180000, stream); err != nil {
 		close(stop)
 	}
 }
@@ -44,11 +52,11 @@ func (s *service) listenAndSendARGPrice(stream chan *wsClient.CoinAveragePriceSt
 			}
 
 			// sleep is calculated as the <reveal end timestamp> - <current block timestamp> - 2 seconds in ms
-			sleep, _ := time.ParseDuration(fmt.Sprintf("%vms", (epoch.RevealEndTimestamp.Uint64()-epoch.CurrentTimestamp.Uint64())*1000-2000))
+			sleep, _ := time.ParseDuration(fmt.Sprintf("%vs", epoch.RevealEndTimestamp.Uint64()-epoch.CurrentTimestamp.Uint64()-60))
 			price := big.NewInt(int64(data.Value * 1000))
 			random := s.getRandom()
 
-			id := contracts.GetTokenIDFromString(data.Coin)
+			id := contracts.GetTokenIDFromName(data.Coin)
 			if id == contracts.UnknownToken && id.Index().Int64() < 0 {
 				logErr("received unknown token id", "listenAndSendARGPrice")
 				continue
