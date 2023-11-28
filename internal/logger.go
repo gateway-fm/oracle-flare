@@ -6,13 +6,12 @@ import (
 	"oracle-flare/pkg/logger"
 )
 
-//func logFatal(msg string, method string) {
-//	logger.Log().WithField("layer", fmt.Sprintf("App-%s", method)).Fatal(msg)
-//}
-//
-//func logWarn(msg string, method string) {
-//	logger.Log().WithField("layer", fmt.Sprintf("App-%s", method)).Warning(msg)
-//}
+//	func logFatal(msg string, method string) {
+//		logger.Log().WithField("layer", fmt.Sprintf("App-%s", method)).Fatal(msg)
+//	}
+func logWarn(msg string, method string) {
+	logger.Log().WithField("layer", fmt.Sprintf("App-%s", method)).Warning(msg)
+}
 
 func logInfo(msg string, method string) {
 	logger.Log().WithField("layer", fmt.Sprintf("App-%s", method)).Info(msg)

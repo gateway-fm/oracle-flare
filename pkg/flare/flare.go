@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"math/big"
 
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 
 	"oracle-flare/config"
@@ -15,6 +18,10 @@ import (
 // IFlare is a flare smart-contracts service interface. It aggregates all needed methods in one interface and is used
 // as an entrypoint for the flare service interactions
 type IFlare interface {
+	// RequestWhitelistingVoter is used to whitelist given address for given token ID
+	RequestWhitelistingVoter(address common.Address, index contracts.TokenID) error
+	// GetFtsoWhitelistedPriceProviders is used to get all whitelisted providers for given token ID
+	GetFtsoWhitelistedPriceProviders(index contracts.TokenID) ([]common.Address, error)
 	// GetCurrentPriceEpochData is used to get current price epoch data. New price epoch data is set each 3 minutes
 	GetCurrentPriceEpochData() (*contracts.PriceEpochData, error)
 	// CommitPrices is used to commit prices for given epoch id
@@ -30,9 +37,11 @@ type IFlare interface {
 type flare struct {
 	conf     *config.Flare
 	provider *ethclient.Client
+	signer   *bind.TransactOpts
 
 	// used flare smart-contracts
 
+	whitLister     contracts.IVoterWhiteLister
 	priceSubmitter contracts.IPriceSubmitter
 	ftsoManager    contracts.IFTSOManager
 	ftsoRegistry   contracts.IFTSORegistry
@@ -60,6 +69,21 @@ func (f *flare) init() {
 
 	if id == UnknownChain {
 		logFatal(fmt.Sprintf("chain id: %v not supported", f.conf.ChainID), "Init")
+	}
+
+	// get signer
+
+	if f.conf.SignerPK == "" {
+		logFatal("no pk in the configs", "Init")
+	}
+
+	pk, err := crypto.HexToECDSA(f.conf.SignerPK)
+	if err != nil {
+		logFatal(fmt.Sprintln("err get PK:", err.Error()), "Init")
+	}
+
+	if f.signer, err = bind.NewKeyedTransactorWithChainID(pk, big.NewInt(int64(id.ID()))); err != nil {
+		logFatal(fmt.Sprintln("err get signer:", err.Error()), "Init")
 	}
 
 	// init rpc provider
@@ -99,17 +123,34 @@ func (f *flare) init() {
 		logFatal(fmt.Sprintln("get ftsoRegistry address error:", err.Error()), "Init")
 	}
 
+	voterAddress, err := f.register.getContractAddress("VoterWhitelister")
+	if err != nil {
+		logFatal(fmt.Sprintln("get voterWhitelister address error:", err.Error()), "Init")
+	}
+
 	// For different chain IDs different smart contracts (addresses and ABIs) are used.
 	// Each smart contract implements the contracts.IContracts interfaces
 
 	switch id {
 	case FlareChain:
-		f.priceSubmitter = flareChain.NewPriceSubmitter(f.provider, *submitterAddress)
+		f.priceSubmitter = flareChain.NewPriceSubmitter(f.provider, *submitterAddress, f.signer)
 		f.ftsoManager = flareChain.NewFTSOManager(f.provider, *managerAddress)
 		f.ftsoRegistry = flareChain.NewFTSORegistry(f.provider, *registryAddress)
+		f.whitLister = flareChain.NewVoterWhiteLister(f.provider, *voterAddress, f.signer)
 
 		if err := f.fillTokenIDs(); err != nil {
-			logFatal(fmt.Sprintln("fill chain ids error:", err.Error()), "Init")
+			logFatal(fmt.Sprintln("fill token ids error:", err.Error()), "Init")
+		}
+
+		// Same ABI as for Flare main-net for methods that are used in this service
+	case Coston2Chain:
+		f.priceSubmitter = flareChain.NewPriceSubmitter(f.provider, *submitterAddress, f.signer)
+		f.ftsoManager = flareChain.NewFTSOManager(f.provider, *managerAddress)
+		f.ftsoRegistry = flareChain.NewFTSORegistry(f.provider, *registryAddress)
+		f.whitLister = flareChain.NewVoterWhiteLister(f.provider, *voterAddress, f.signer)
+
+		if err := f.fillTokenIDs(); err != nil {
+			logFatal(fmt.Sprintln("fill token ids error:", err.Error()), "Init")
 		}
 
 	case SongBirdChain:
@@ -118,19 +159,19 @@ func (f *flare) init() {
 		f.ftsoRegistry = songbirdChain.NewFTSORegistry(f.provider, *registryAddress)
 
 		if err := f.fillTokenIDs(); err != nil {
-			logFatal(fmt.Sprintln("fill chain ids error:", err.Error()), "Init")
+			logFatal(fmt.Sprintln("fill token ids error:", err.Error()), "Init")
 		}
 	}
 }
 
-// fillTokenIDs is used to fill token ids with the onchain data
+// fillTokenIDs is used to fill token ids with the onchain data and token symbols string values
 func (f *flare) fillTokenIDs() error {
 	data, err := f.ftsoRegistry.GetSupportedIndicesAndSymbols()
 	if err != nil {
 		return err
 	}
 
-	contracts.FillTokenIDs(data)
+	contracts.FillTokenIDAndNames(data, f.conf.ChainID == Coston2Chain.ID())
 
 	return nil
 }
@@ -145,6 +186,14 @@ func (f *flare) RevealPrices(epochID *big.Int, indices []contracts.TokenID, pric
 
 func (f *flare) GetCurrentPriceEpochData() (*contracts.PriceEpochData, error) {
 	return f.ftsoManager.GetCurrentPriceEpochData()
+}
+
+func (f *flare) RequestWhitelistingVoter(address common.Address, index contracts.TokenID) error {
+	return f.whitLister.RequestWhitelistingVoter(address, index)
+}
+
+func (f *flare) GetFtsoWhitelistedPriceProviders(index contracts.TokenID) ([]common.Address, error) {
+	return f.whitLister.GetFtsoWhitelistedPriceProviders(index)
 }
 
 func (f *flare) Close() {

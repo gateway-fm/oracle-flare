@@ -1,6 +1,7 @@
 package main
 
 import (
+	"oracle-flare/cmd/whitelist"
 	"os"
 
 	"github.com/misnaged/annales/logger"
@@ -24,6 +25,7 @@ func main() {
 
 	rootCmd := root.Cmd(app)
 	rootCmd.AddCommand(serve.Cmd(app))
+	rootCmd.AddCommand(whitelist.Cmd(app))
 
 	if err := rootCmd.Execute(); err != nil {
 		logger.Log().Infof("An error occurred: %s", err.Error())

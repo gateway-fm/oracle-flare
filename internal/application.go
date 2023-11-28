@@ -2,6 +2,7 @@ package internal
 
 import (
 	"fmt"
+	"oracle-flare/pkg/flare/contracts"
 	"os"
 	"os/signal"
 	"syscall"
@@ -20,6 +21,8 @@ type App struct {
 	// application configuration
 	config *config.Scheme
 
+	ws      wsClient.IWSClient
+	fl      flare.IFlare
 	srv     service.IService
 	version *version.Version
 }
@@ -40,16 +43,42 @@ func NewApplication() (app *App, err error) {
 // Init initialize application and all necessary instances
 func (app *App) Init() error {
 
-	ws := wsClient.NewClient(app.config.WS)
-	fl := flare.NewFlare(app.config.Flare)
-	app.srv = service.NewService(ws, fl)
+	app.ws = wsClient.NewClient(app.config.WS)
+	app.fl = flare.NewFlare(app.config.Flare)
+	app.srv = service.NewService(app.ws, app.fl)
 
+	return nil
+}
+
+// InitForWhiteList initialize application and all necessary instances for whitelist command
+func (app *App) InitForWhiteList() error {
+	app.fl = flare.NewFlare(app.config.Flare)
+	app.srv = service.NewService(nil, app.fl)
+
+	return nil
+}
+
+// WhiteListAddress is used to run for whitelist command
+func (app *App) WhiteListAddress(address string, token string) error {
+	ok, err := app.srv.WhiteListAddress(address, token)
+	if err != nil {
+		app.Stop()
+		return err
+	}
+
+	if ok {
+		logInfo(fmt.Sprintf("address: %s for %s whitelisted successfully", address, token), "WhiteListAddress")
+	} else {
+		logWarn(fmt.Sprintf("address: %s for %s whitelisted unsuccessfully", address, token), "WhiteListAddress")
+	}
+
+	app.Stop()
 	return nil
 }
 
 // Serve start serving Application service
 func (app *App) Serve() error {
-	go app.srv.SendCoinAveragePrice()
+	go app.srv.SendCoinAveragePrice(contracts.ETH)
 
 	// Gracefully shutdown the server
 	quit := make(chan os.Signal, 1)
@@ -66,6 +95,14 @@ func (app *App) Stop() {
 	logInfo("app stop...", "Stop")
 	if app.srv != nil {
 		app.srv.Close()
+	}
+
+	if app.fl != nil {
+		app.fl.Close()
+	}
+
+	if app.ws != nil {
+		app.ws.Close()
 	}
 }
 

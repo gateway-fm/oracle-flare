@@ -103,6 +103,9 @@ test:
 run-ws-example:
 	go run ./pkg/wsClient/example/wsClientExample.go
 
+# To run whitelist command use this example
+# go run -race ./cmd/oracle-flare.go whitelist --address 0x8382Be7cc5C2Cd8b14F44108444ced6745c5feCb --token testETH
+
 # The clean target deletes the build output file
 clean:
 	rm $(BUILD_OUT_DIR)/$(APP)
