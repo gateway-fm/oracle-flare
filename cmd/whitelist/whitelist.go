@@ -12,7 +12,7 @@ import (
 // Cmd returns the "whitelist" command of the application.
 // This command is responsible for initializing and adding given address for given token to the smart-contract whitelist
 func Cmd(app *internal.App) *cobra.Command {
-	return &cobra.Command{
+	cmd := &cobra.Command{
 		Use:   "whitelist",
 		Short: "Whitelist address",
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -36,4 +36,9 @@ func Cmd(app *internal.App) *cobra.Command {
 			logger.Log().Info(app.Version())
 		},
 	}
+
+	cmd.Flags().String("address", "", "wallet address for whitelist")
+	cmd.Flags().String("token", "", "token symbol for whitelist")
+
+	return cmd
 }

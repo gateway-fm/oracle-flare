@@ -25,11 +25,7 @@ func main() {
 
 	rootCmd := root.Cmd(app)
 	rootCmd.AddCommand(serve.Cmd(app))
-	wlCMD := whitelist.Cmd(app)
-
-	wlCMD.Flags().String("address", "", "wallet address for whitelist")
-	wlCMD.Flags().String("token", "", "token symbol for whitelist")
-	rootCmd.AddCommand(wlCMD)
+	rootCmd.AddCommand(whitelist.Cmd(app))
 
 	if err := rootCmd.Execute(); err != nil {
 		logger.Log().Infof("An error occurred: %s", err.Error())
