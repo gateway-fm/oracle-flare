@@ -18,7 +18,7 @@ func Log() *logger {
 	once.Do(func() {
 		log := logrus.New()
 
-		log.SetLevel(logrus.DebugLevel)
+		log.SetLevel(logrus.InfoLevel)
 
 		log.SetOutput(os.Stdout)
 		log.SetFormatter(&easy.Formatter{
