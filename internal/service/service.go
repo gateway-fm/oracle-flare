@@ -32,17 +32,19 @@ type service struct {
 	// stopChans is a mapping subscription id to close chan
 	stopChans map[int]chan struct{}
 	// stopAll is used to stop all subscriptions
-	stopAll chan struct{}
+	stopAll     chan struct{}
+	resubscribe chan struct{}
 }
 
 // NewService is used to get new service instance
 func NewService(ws wsClient.IWSClient, flare flare.IFlare) IService {
 	logInfo("creating new service...", "Init")
 	c := &service{
-		wsClient:  ws,
-		flare:     flare,
-		stopAll:   make(chan struct{}),
-		stopChans: map[int]chan struct{}{},
+		wsClient:    ws,
+		flare:       flare,
+		stopAll:     make(chan struct{}),
+		stopChans:   map[int]chan struct{}{},
+		resubscribe: ws.Resubscribe(),
 	}
 
 	return c

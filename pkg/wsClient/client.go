@@ -15,6 +15,8 @@ import (
 type IWSClient interface {
 	// SubscribeCoinAveragePrice is used to send subscribe msg for the prc coin_average_price method
 	SubscribeCoinAveragePrice(coins []string, id int, frequencyMS int, v chan *CoinAveragePriceStream) error
+	// Resubscribe is used to get the chanel for resubscribe-needed signal
+	Resubscribe() chan struct{}
 	// Close is used to close the service
 	Close()
 }
@@ -30,6 +32,8 @@ type client struct {
 	streams map[int]chan *CoinAveragePriceStream
 	// stop is used to stop the connections listener
 	stop chan struct{}
+	// resubscribe is used to send a resubscribe-needed signal
+	resubscribe chan struct{}
 }
 
 // NewClient is used to get new client instance
@@ -39,24 +43,31 @@ func NewClient(conf *config.WS) IWSClient {
 		mu:   sync.Mutex{},
 	}
 
-	c.init()
+	if err := c.init(); err != nil {
+		logFatal(fmt.Sprintln("err init ws:", err.Error()), "Init")
+	}
 	go c.listenWS()
 
 	return c
 }
 
 // init is used to init client dependencies
-func (c *client) init() {
-	logInfo("new ws client init...", "Init")
+func (c *client) init() error {
+	logInfo("new ws client init attempt...", "Init")
 
 	conn, _, err := websocket.DefaultDialer.Dial(c.conf.URL, nil)
 	if err != nil {
-		logFatal(fmt.Sprintln("err dial server:", err.Error()), "Init")
+		logWarn(fmt.Sprintln("err dial ws server during init, reconnecting in 5 sec err:", err.Error()), "Init")
+		time.Sleep(time.Second * 5)
+		return c.init()
 	}
 
 	c.streams = make(map[int]chan *CoinAveragePriceStream)
 	c.conn = conn
 	c.stop = make(chan struct{})
+	c.resubscribe = make(chan struct{})
+
+	return nil
 }
 
 // Close is used to stop the service
@@ -73,6 +84,28 @@ func (c *client) Close() {
 	}
 }
 
+func (c *client) Resubscribe() chan struct{} {
+	return c.resubscribe
+}
+
+// Reconnect is used to reconnect to the ws server when unexpected close error occurred
+func (c *client) reconnect() {
+	logWarn("reconnecting...", "Reconnect")
+	time.Sleep(time.Second * 5)
+
+	conn, _, err := websocket.DefaultDialer.Dial(c.conf.URL, nil)
+	if err != nil {
+		logWarn(fmt.Sprintln("reconnect err:", err.Error()), "Reconnect")
+		go c.reconnect()
+		return
+	}
+
+	c.conn = conn
+
+	go c.listenWS()
+	c.resubscribe <- struct{}{}
+}
+
 // listenWS is used to listen to the ws connection
 func (c *client) listenWS() {
 	logInfo("listening to ws oracle...", "listenWS")
@@ -85,6 +118,11 @@ func (c *client) listenWS() {
 		default:
 			_, data, err := c.conn.ReadMessage()
 			if err != nil {
+				if websocket.IsUnexpectedCloseError(err) {
+					logWarn(fmt.Sprintln("unexpected close err:", err.Error()), "listenWS")
+					go c.reconnect()
+					return
+				}
 				// error can be occurred when stop the service
 				logWarn(fmt.Sprintln("err from server:", err.Error()), "listenWS")
 				return

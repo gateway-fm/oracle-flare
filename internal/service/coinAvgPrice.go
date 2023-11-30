@@ -24,12 +24,22 @@ func (s *service) SendCoinAveragePrice(token contracts.TokenID) {
 	dur := epoch.EndTimestamp.Uint64() - epoch.CurrentTimestamp.Uint64()
 	logDebug(fmt.Sprintf("end epoch in %v seconds", dur), "SendCoinAveragePrice")
 
-	go s.listenAndSendARGPrice(stream, stop)
+	go s.listenAndSendARGPrice([]string{token.Name()}, id, 5000, stream, stop)
 
-	// price symbols should be set here. Check if symbols are supported in the pkg-flare-contracts-tokenIDs
-	if err := s.wsClient.SubscribeCoinAveragePrice([]string{token.Name()}, id, 180000, stream); err != nil {
+	// price symbols should be set here. Check if symbols are supported in the pkg-flare-contracts-tokenIDs 180 000
+	if err := s.subscribeCoinAveragePrice([]string{token.Name()}, id, 5000, stream); err != nil {
 		close(stop)
 	}
+}
+
+// subscribeCoinAveragePrice is used to send subscribe message to the ws server
+func (s *service) subscribeCoinAveragePrice(tokens []string, id int, freq int, stream chan *wsClient.CoinAveragePriceStream) error {
+	if err := s.wsClient.SubscribeCoinAveragePrice(tokens, id, freq, stream); err != nil {
+		time.Sleep(time.Second * 5)
+		return s.subscribeCoinAveragePrice(tokens, id, freq, stream)
+	}
+
+	return nil
 }
 
 // TODO: refactor flow for several token IDs. Contract method should be called once for each epoch
@@ -37,15 +47,20 @@ func (s *service) SendCoinAveragePrice(token contracts.TokenID) {
 // listenAndSendARGPrice is used to listen to the CoinAveragePriceStream chanel and send data to the flare smart contracts.
 // Sending flow is based on Flare documentation. Price data is sent each 3 minutes and reveal is send in the reveal timing
 // received from the flare smart-contract
-func (s *service) listenAndSendARGPrice(stream chan *wsClient.CoinAveragePriceStream, stop chan struct{}) {
+func (s *service) listenAndSendARGPrice(tokens []string, id int, freq int, stream chan *wsClient.CoinAveragePriceStream, stop chan struct{}) {
 	for {
 		select {
 		case <-s.stopAll:
 			return
 		case <-stop:
 			return
+		case <-s.resubscribe:
+			if err := s.subscribeCoinAveragePrice(tokens, id, freq, stream); err != nil {
+				logErr(fmt.Sprintln("err resubscribe:", err.Error()), "listenAndSendARGPrice")
+				return
+			}
 		case data := <-stream:
-			logTrace(fmt.Sprintf("received data ont the %s coin", data.Coin), "listenAndSendARGPrice")
+			logTrace(fmt.Sprintf("received data on the %s coin", data.Coin), "listenAndSendARGPrice")
 			epoch, err := s.flare.GetCurrentPriceEpochData()
 			if err != nil {
 				logErr(fmt.Sprintln("err get epoch:", err.Error()), "listenAndSendARGPrice")
