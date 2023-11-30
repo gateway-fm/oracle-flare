@@ -30,9 +30,6 @@ FROM scratch
 # Copy the SSL certificates from the base image
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
-# Copy contract abis
-COPY --from=builder /app/abis /abis
-
 # Copy the built executable from the builder image
 COPY --from=builder /app/oracle-flare /oracle-flare
 
