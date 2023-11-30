@@ -9,6 +9,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 
+	songbird_abi "oracle-flare/abis/songbird"
 	"oracle-flare/pkg/flare/contracts"
 	"oracle-flare/pkg/logger"
 	"oracle-flare/utils/contractUtils"
@@ -36,7 +37,7 @@ func NewPriceSubmitter(provider *ethclient.Client, address common.Address) contr
 
 // init is used to create new smart-contract instance
 func (c *priceSubmitter) init() {
-	abiI, contract, err := contractUtils.GetContract("./abis/songbird/IPriceSubmitter.abi", c.address, c.provider, c.provider)
+	abiI, contract, err := contractUtils.GetContract(songbird_abi.IPriceSubmitter, c.address, c.provider, c.provider)
 	if err != nil {
 		logger.Log().WithField("layer", "PriceSubmitter-Init").Fatalln("err get contract:", err.Error())
 	}

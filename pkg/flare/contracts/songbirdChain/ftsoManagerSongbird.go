@@ -8,6 +8,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 
+	songbird_abi "oracle-flare/abis/songbird"
 	"oracle-flare/pkg/flare/contracts"
 	"oracle-flare/pkg/logger"
 	"oracle-flare/utils/contractUtils"
@@ -35,7 +36,7 @@ func NewFTSOManager(provider *ethclient.Client, address common.Address) contract
 
 // init is used to create new smart-contract instance
 func (c *ftsoManager) init() {
-	abiI, contract, err := contractUtils.GetContract("./abis/songbird/IFtsoManager.abi", c.address, c.provider, c.provider)
+	abiI, contract, err := contractUtils.GetContract(songbird_abi.IFtsoManager, c.address, c.provider, c.provider)
 	if err != nil {
 		logger.Log().WithField("layer", "FTSO-Init").Fatalln("err get contract:", err.Error())
 	}

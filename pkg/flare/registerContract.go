@@ -2,12 +2,12 @@ package flare
 
 import (
 	"fmt"
-
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 
+	common_abi "oracle-flare/abis"
 	"oracle-flare/utils/contractUtils"
 )
 
@@ -46,7 +46,7 @@ func (c *registerContract) getContractAddress(name string) (*common.Address, err
 
 // init is used to init the registerContract
 func (c *registerContract) init() {
-	abiI, contract, err := contractUtils.GetContract("./abis/IFlareContractRegistry.abi", c.address, c.provider, c.provider)
+	abiI, contract, err := contractUtils.GetContract(common_abi.IFlareContractRegistry, c.address, c.provider, c.provider)
 	if err != nil {
 		logFatal(fmt.Sprintln("err get contract register:", err.Error()), "Init")
 	}
