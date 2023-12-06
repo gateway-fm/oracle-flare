@@ -4,7 +4,7 @@ FROM golang:1.21 AS base
 # Install needed dependencies for base image and update certs
 RUN apt-get update \
   && apt-get install -y make openssh-client ca-certificates unzip \
-    && update-ca-certificates
+  && update-ca-certificates
 
 # create a build artifact
 FROM base AS builder
@@ -34,4 +34,4 @@ COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=builder /app/oracle-flare /oracle-flare
 
 # Set the entrypoint to the executable
-ENTRYPOINT ["/oracle-flare", "serve"]
+ENTRYPOINT ["/oracle-flare"]
