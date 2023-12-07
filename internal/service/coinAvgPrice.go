@@ -24,10 +24,10 @@ func (s *service) SendCoinAveragePrice(token contracts.TokenID) {
 	dur := epoch.EndTimestamp.Uint64() - epoch.CurrentTimestamp.Uint64()
 	logDebug(fmt.Sprintf("end epoch in %v seconds", dur), "SendCoinAveragePrice")
 
-	go s.listenAndSendARGPrice([]string{token.Name()}, id, 5000, stream, stop)
+	go s.listenAndSendARGPrice([]string{token.Name()}, id, 180000, stream, stop)
 
 	// price symbols should be set here. Check if symbols are supported in the pkg-flare-contracts-tokenIDs 180 000
-	if err := s.subscribeCoinAveragePrice([]string{token.Name()}, id, 5000, stream); err != nil {
+	if err := s.subscribeCoinAveragePrice([]string{token.Name()}, id, 180000, stream); err != nil {
 		close(stop)
 	}
 }
