@@ -40,11 +40,17 @@ type service struct {
 func NewService(ws wsClient.IWSClient, flare flare.IFlare) IService {
 	logInfo("creating new service...", "Init")
 	c := &service{
-		wsClient:    ws,
-		flare:       flare,
-		stopAll:     make(chan struct{}),
-		stopChans:   map[int]chan struct{}{},
-		resubscribe: ws.Resubscribe(),
+		stopAll:   make(chan struct{}),
+		stopChans: map[int]chan struct{}{},
+	}
+
+	if ws != nil {
+		c.wsClient = ws
+		c.resubscribe = ws.Resubscribe()
+	}
+
+	if flare != nil {
+		c.flare = flare
 	}
 
 	return c
