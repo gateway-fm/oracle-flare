@@ -73,7 +73,7 @@ func (c *priceSubmitter) CommitPrices(epochID *big.Int, indices []contracts.Toke
 		return err
 	}
 
-	logger.Log().WithField("layer", "PriceSubmitter-CommitPrices").Infoln("submitHash tx time:", tx.Time())
+	logger.Log().WithField("layer", "PriceSubmitter-CommitPrices").Infof("submitHash tx hash: %v time: %v", tx.Hash(), tx.Time())
 
 	return nil
 }
@@ -91,7 +91,7 @@ func (c *priceSubmitter) RevealPrices(epochID *big.Int, indices []contracts.Toke
 		return err
 	}
 
-	logger.Log().WithField("layer", "PriceSubmitter-RevealPrices").Infoln("revealPrices tx time:", tx.Time())
+	logger.Log().WithField("layer", "PriceSubmitter-RevealPrices").Infof("revealPrices tx hash: %v time: %v", tx.Hash(), tx.Time())
 
 	return nil
 }
