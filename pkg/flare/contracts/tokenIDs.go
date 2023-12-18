@@ -10,29 +10,34 @@ type TokenID int
 const (
 	UnknownToken TokenID = iota
 	ETH
+	BTC
 )
 
 // TokenIDWSNames are the names for WS service
 var TokenIDWSNames = [...]string{
 	UnknownToken: "UnknownToken",
 	ETH:          "ETH",
+	BTC:          "BTC",
 }
 
 // TokenIDSymbol are the names for smart-contract. Filled on init depends on the chain ID
 var TokenIDSymbol = [...]string{
 	UnknownToken: "UnknownToken",
 	ETH:          "ETH",
+	BTC:          "BTC",
 }
 
 var TokenIDIndices = []*big.Int{
 	UnknownToken: big.NewInt(-1),
 	ETH:          big.NewInt(-1),
+	BTC:          big.NewInt(-1),
 }
 
 // FillTokenIDAndNames is used to fill the TokenIDIndices with on-chain values and names depend on the chain id
 func FillTokenIDAndNames(data *IndicesAndSymbols, isTestNet bool) {
 	if isTestNet {
 		TokenIDSymbol[ETH] = "testETH"
+		TokenIDSymbol[BTC] = "testBTC"
 	}
 
 	for i, s := range data.Symbols {
@@ -48,6 +53,8 @@ func GetTokenIDFromName(s string) TokenID {
 	switch s {
 	case ETH.Name():
 		return ETH
+	case BTC.Name():
+		return BTC
 	default:
 		return UnknownToken
 	}
@@ -58,6 +65,8 @@ func GetTokenIDFromSymbol(s string) TokenID {
 	switch s {
 	case ETH.Symbol():
 		return ETH
+	case BTC.Symbol():
+		return BTC
 	default:
 		return UnknownToken
 	}
