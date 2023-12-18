@@ -5,8 +5,10 @@ type Scheme struct {
 	// Env is the application environment.
 	Env string
 
-	WS    *WS
-	Flare *Flare
+	// Tokens is used for SendCoinAveragePrice method
+	Tokens []string
+	WS     *WS
+	Flare  *Flare
 }
 
 // Flare is a pkg-flare configs

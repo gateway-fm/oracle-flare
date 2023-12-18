@@ -2,6 +2,7 @@ package flareChain
 
 import (
 	"math/big"
+	"sort"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -61,7 +62,14 @@ func (c *priceSubmitter) CommitPrices(epochID *big.Int, indices []contracts.Toke
 		indicesBig = append(indicesBig, i.Index())
 	}
 
-	hash, err := coder.KeccakHash(indicesBig, prices, random, c.signer.From)
+	sortStruct := SubmitterSort{
+		Indices: indicesBig,
+		Prices:  prices,
+	}
+
+	sort.Sort(sortStruct)
+
+	hash, err := coder.KeccakHash(sortStruct.Indices, sortStruct.Prices, random, c.signer.From)
 	if err != nil {
 		logger.Log().WithField("layer", "PriceSubmitter-CommitPrices").Errorln("err get hash:", err.Error())
 		return err
@@ -85,7 +93,14 @@ func (c *priceSubmitter) RevealPrices(epochID *big.Int, indices []contracts.Toke
 		indicesBig = append(indicesBig, i.Index())
 	}
 
-	tx, err := c.contract.Transact(c.signer, "revealPrices", epochID, indicesBig, prices, random)
+	sortStruct := SubmitterSort{
+		Indices: indicesBig,
+		Prices:  prices,
+	}
+
+	sort.Sort(sortStruct)
+
+	tx, err := c.contract.Transact(c.signer, "revealPrices", epochID, sortStruct.Indices, sortStruct.Prices, random)
 	if err != nil {
 		logger.Log().WithField("layer", "PriceSubmitter-RevealPrices").Errorln("err tx:", err.Error())
 		return err
