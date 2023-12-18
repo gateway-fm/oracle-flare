@@ -12,8 +12,14 @@ import (
 )
 
 // SendCoinAveragePrice is used to subscribe on the avg price and send results to the flare smart contracts
-func (s *service) SendCoinAveragePrice(tokens []contracts.TokenID) {
-	sender := newCoinAvgPriceSender(len(s.avgPriceSenders), s.flare, s.wsClient, tokens)
+func (s *service) SendCoinAveragePrice(tokens []string) {
+	parsedTokens := []contracts.TokenID{}
+
+	for _, t := range tokens {
+		parsedTokens = append(parsedTokens, contracts.GetTokenIDFromName(t))
+	}
+
+	sender := newCoinAvgPriceSender(len(s.avgPriceSenders), s.flare, s.wsClient, parsedTokens)
 	s.avgPriceSenders = append(s.avgPriceSenders, sender)
 
 	sender.run()
