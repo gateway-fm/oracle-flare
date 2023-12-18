@@ -78,7 +78,7 @@ func (app *App) WhiteListAddress(address string, token string) error {
 
 // Serve start serving Application service
 func (app *App) Serve() error {
-	go app.srv.SendCoinAveragePrice(contracts.ETH)
+	go app.srv.SendCoinAveragePrice([]contracts.TokenID{contracts.ETH, contracts.BTC})
 
 	// Gracefully shutdown the server
 	quit := make(chan os.Signal, 1)

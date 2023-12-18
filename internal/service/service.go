@@ -1,11 +1,8 @@
 package service
 
 import (
-	"crypto/rand"
-	"math/big"
-	"oracle-flare/pkg/flare/contracts"
-
 	"oracle-flare/pkg/flare"
+	"oracle-flare/pkg/flare/contracts"
 	"oracle-flare/pkg/wsClient"
 )
 
@@ -14,7 +11,7 @@ type IService interface {
 	// WhiteListAddress is used to add address to the smart-contract whitelist with given token
 	WhiteListAddress(addressS string, indexS string) (bool, error)
 	// SendCoinAveragePrice is used to send coin average price from the ws service to the flare smart-contracts
-	SendCoinAveragePrice(token contracts.TokenID)
+	SendCoinAveragePrice(tokens []contracts.TokenID)
 	// Close is used to stop the service
 	Close()
 }
@@ -24,24 +21,15 @@ type service struct {
 	flare    flare.IFlare
 	wsClient wsClient.IWSClient
 
-	// random is used for current random-arg for flare contracts
-	random *big.Int
-	// nextID is used to store next subscription ID
-	nextID int
-
-	// stopChans is a mapping subscription id to close chan
-	stopChans map[int]chan struct{}
-	// stopAll is used to stop all subscriptions
-	stopAll     chan struct{}
-	resubscribe chan struct{}
+	avgPriceSenders []*coinAVGPriceSender
+	resubscribe     chan struct{}
 }
 
 // NewService is used to get new service instance
 func NewService(ws wsClient.IWSClient, flare flare.IFlare) IService {
 	logInfo("creating new service...", "Init")
 	c := &service{
-		stopAll:   make(chan struct{}),
-		stopChans: map[int]chan struct{}{},
+		avgPriceSenders: make([]*coinAVGPriceSender, 0),
 	}
 
 	if ws != nil {
@@ -53,29 +41,26 @@ func NewService(ws wsClient.IWSClient, flare flare.IFlare) IService {
 		c.flare = flare
 	}
 
+	go c.listenResubscribe()
+
 	return c
+}
+
+func (s *service) listenResubscribe() {
+	for {
+		select {
+		case <-s.resubscribe:
+			for _, v := range s.avgPriceSenders {
+				v.resubscribe <- struct{}{}
+			}
+		}
+	}
 }
 
 // Close is used to close the service and all dependencies
 func (s *service) Close() {
 	logInfo("service closing...", "Close")
-	close(s.stopAll)
-}
-
-// getNextID is used to update nextID arg and return it
-func (s *service) getNextID() int {
-	s.nextID++
-	return s.nextID
-}
-
-// getRandom is used to update random arg and return it
-func (s *service) getRandom() *big.Int {
-	random, err := rand.Prime(rand.Reader, 130)
-	if err != nil {
-		return s.getRandom()
+	for _, v := range s.avgPriceSenders {
+		v.close()
 	}
-
-	s.random = random
-
-	return random
 }
