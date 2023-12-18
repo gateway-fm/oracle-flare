@@ -15,8 +15,7 @@ jobs:
     name: Build and push Docker image
     if: ${{ github.ref == 'refs/heads/main' }}
     runs-on:
-      - self-hosted
-      - dev
+      - ubuntu-latest
     outputs:
       release_tag: ${{ steps.tag_version.outputs.new_tag }}
     steps:
