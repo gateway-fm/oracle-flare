@@ -139,6 +139,7 @@ func (s *coinAVGPriceSender) listenAndSendARGPrice(tokens []string, id int, freq
 
 // reveal will wait the sleep time and then call the reveal smart-contract method
 func (s *coinAVGPriceSender) reveal(sleep time.Duration, epochID *big.Int, indices []contracts.TokenID, prices []*big.Int, random *big.Int) {
+	logDebug(fmt.Sprintf("received for reveal: epochID %v, indices %v, prices %v, random %v", epochID, indices, prices, random), "reveal")
 	logDebug(fmt.Sprintln("sleep for:", sleep), "reveal")
 	time.Sleep(sleep)
 	logTrace(fmt.Sprintf("revealing price for the %v epoch", epochID.Int64()), "reveal")
@@ -149,9 +150,7 @@ func (s *coinAVGPriceSender) reveal(sleep time.Duration, epochID *big.Int, indic
 
 // resetPrices is used to reset prices after all token prices are collected in the submit-reveal flow
 func (s *coinAVGPriceSender) resetPrices() {
-	for _, t := range s.tokens {
-		s.prices[t] = nil
-	}
+	s.prices = make(map[contracts.TokenID]*big.Int)
 }
 
 // parsePrices is used to get big int prices from the prices map
