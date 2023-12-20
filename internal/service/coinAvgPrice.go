@@ -16,7 +16,17 @@ func (s *service) SendCoinAveragePrice(tokens []string) {
 	parsedTokens := []contracts.TokenID{}
 
 	for _, t := range tokens {
-		parsedTokens = append(parsedTokens, contracts.GetTokenIDFromName(t))
+		parsedToken := contracts.GetTokenIDFromName(t)
+		if parsedToken == contracts.UnknownToken {
+			logWarn(fmt.Sprintln("received unknown token:", t), "SendCoinAveragePrice")
+		} else {
+			parsedTokens = append(parsedTokens, parsedToken)
+		}
+	}
+
+	if len(parsedTokens) == 0 {
+		logErr("all tokens are invalid", "SendCoinAveragePrice")
+		return
 	}
 
 	sender := newCoinAvgPriceSender(len(s.avgPriceSenders), s.flare, s.wsClient, parsedTokens)

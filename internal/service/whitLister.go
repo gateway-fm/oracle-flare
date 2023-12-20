@@ -9,36 +9,70 @@ import (
 	"oracle-flare/pkg/flare/contracts"
 )
 
-func (s *service) WhiteListAddress(addressS string, indexS string) (bool, error) {
+func (s *service) WhiteListAddress(addressS string, indicesS []string) ([]bool, error) {
 	if addressS == "" {
-		return false, fmt.Errorf("no address given")
+		return nil, fmt.Errorf("no address given")
 	}
 
-	if indexS == "" {
-		return false, fmt.Errorf("no index given")
+	if len(indicesS) == 0 {
+		return nil, fmt.Errorf("no indices given")
 	}
 
 	address := common.HexToAddress(addressS)
-	index := contracts.GetTokenIDFromSymbol(indexS)
 
-	isWhitListed, err := s.isAddressWhitelisted(index, address)
-	if err != nil {
-		return false, err
+	res := []bool{}
+	for _, i := range indicesS {
+		logInfo(fmt.Sprintln("whitelisting for:", i), "WhiteListAddress")
+
+		index := contracts.GetTokenIDFromName(i)
+
+		if index == contracts.UnknownToken {
+			logWarn("unknown token", "WhiteListAddress")
+			res = append(res, false)
+			continue
+		}
+
+		isWhitListed, err := s.isAddressWhitelisted(index, address)
+		if err != nil {
+			logErr(fmt.Sprintln("err isAddressWhitelisted:", err.Error()), "WhiteListAddress")
+			res = append(res, false)
+			continue
+		}
+
+		if isWhitListed {
+			if err != nil {
+				logErr("address already whitelisted", "WhiteListAddress")
+				res = append(res, true)
+				continue
+			}
+		}
+
+		if err := s.flare.RequestWhitelistingVoter(address, index); err != nil {
+			logErr(fmt.Sprintln("err RequestWhitelistingVoter:", err.Error()), "WhiteListAddress")
+			res = append(res, false)
+			continue
+		}
+
+		// wait for the tx
+		time.Sleep(time.Second * 3)
+
+		isWhitListed, err = s.isAddressWhitelisted(index, address)
+		if err != nil {
+			logErr(fmt.Sprintln("err isAddressWhitelisted:", err.Error()), "WhiteListAddress")
+			res = append(res, false)
+			continue
+		}
+
+		if isWhitListed {
+			logInfo("token whitelisted", "WhiteListAddress")
+			res = append(res, true)
+		} else {
+			logWarn("token not whitelisted", "WhiteListAddress")
+			res = append(res, false)
+		}
 	}
 
-	if isWhitListed {
-		logInfo("address already whitelisted", "WhiteListAddress")
-		return true, nil
-	}
-
-	if err := s.flare.RequestWhitelistingVoter(address, index); err != nil {
-		return false, nil
-	}
-
-	// wait for the tx
-	time.Sleep(time.Second * 3)
-
-	return s.isAddressWhitelisted(index, address)
+	return res, nil
 }
 
 func (s *service) isAddressWhitelisted(index contracts.TokenID, target common.Address) (bool, error) {
