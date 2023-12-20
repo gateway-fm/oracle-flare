@@ -59,16 +59,22 @@ func (app *App) InitForWhiteList() error {
 
 // WhiteListAddress is used to run for whitelist command
 func (app *App) WhiteListAddress(address string, token string) error {
-	ok, err := app.srv.WhiteListAddress(address, token)
+	_, err := app.srv.WhiteListAddress(address, []string{token})
 	if err != nil {
 		app.Stop()
 		return err
 	}
 
-	if ok {
-		logInfo(fmt.Sprintf("address: %s for %s whitelisted successfully", address, token), "WhiteListAddress")
-	} else {
-		logWarn(fmt.Sprintf("address: %s for %s whitelisted unsuccessfully", address, token), "WhiteListAddress")
+	app.Stop()
+	return nil
+}
+
+// WhiteListAddressAll is used to run for whitelistall command
+func (app *App) WhiteListAddressAll(address string) error {
+	_, err := app.srv.WhiteListAddress(address, app.config.Tokens)
+	if err != nil {
+		app.Stop()
+		return err
 	}
 
 	app.Stop()
