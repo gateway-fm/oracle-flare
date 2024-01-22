@@ -7,8 +7,8 @@ import (
 
 // IService is a service layer interface
 type IService interface {
-	// WhiteListAddress is used to add address to the smart-contract whitelist with given token
-	WhiteListAddress(addressS string, indexS string) (bool, error)
+	// WhiteListAddress is used to add address to the smart-contract whitelist with given tokens
+	WhiteListAddress(addressS string, indicesS []string) ([]bool, error)
 	// SendCoinAveragePrice is used to send coin average price from the ws service to the flare smart-contracts
 	SendCoinAveragePrice(tokens []string)
 	// Close is used to stop the service
