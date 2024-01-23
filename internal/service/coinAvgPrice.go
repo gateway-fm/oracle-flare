@@ -116,8 +116,11 @@ func (s *coinAVGPriceSender) listenAndSendARGPrice(tokens []string, id int, freq
 				continue
 			}
 
-			price := big.NewInt(int64(data.Value))
-			s.prices[id] = price
+			price := big.NewFloat(data.Value)
+			price = price.Mul(price, big.NewFloat(100000))
+			integer, _ := price.Int64()
+
+			s.prices[id] = big.NewInt(integer)
 
 			if len(s.prices) != len(s.tokens) {
 				logTrace(fmt.Sprint("wahiting for all coin prices..."), "listenAndSendARGPrice")
