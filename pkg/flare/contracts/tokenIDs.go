@@ -110,7 +110,7 @@ func FillTokenIDAndNames(data *IndicesAndSymbols, isTestNet bool) {
 		TokenIDSymbol[DOGE] = "testDOGE"
 		TokenIDSymbol[ETH] = "testETH"
 		TokenIDSymbol[FIL] = "testFIL"
-		TokenIDSymbol[FLR] = "testFLR"
+		TokenIDSymbol[FLR] = "C2FLR"
 		TokenIDSymbol[LTC] = "testLTC"
 		TokenIDSymbol[MATIC] = "testMATIC"
 		TokenIDSymbol[SOL] = "testSOL"
