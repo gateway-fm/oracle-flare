@@ -31,34 +31,35 @@ func (s *coinAveragePriceSender) sendARGPrice(stop chan struct{}) {
 			logTrace("stop...", "sendARGPrice")
 			return
 		default:
-			logTrace("sending prices...", "sendARGPrice")
-			epoch, err := s.flare.GetCurrentPriceEpochData()
-			if err != nil {
-				logErr(fmt.Sprintln("err get epoch:", err.Error()), "sendARGPrice")
-				time.Sleep(time.Second * 1)
-				continue
-			}
-
-			sleep, _ := time.ParseDuration(fmt.Sprintf("%vs", epoch.RevealEndTimestamp.Uint64()-epoch.CurrentTimestamp.Uint64()-60))
-			random := s.getRandom()
-
-			s.mu.Lock()
-			prices := s.currentPrices()
-			s.mu.Unlock()
-
-			logTrace(fmt.Sprintf("commiting prices"), "sendARGPrice")
-			if err := s.flare.CommitPrices(epoch.EpochID, s.tokens, prices, random); err != nil {
-				time.Sleep(time.Second * 1)
-				continue
-			}
-
-			go s.reveal(sleep, epoch.EpochID, s.tokens, prices, random)
-
-			wait, _ := time.ParseDuration(fmt.Sprintf("%vs", epoch.EndTimestamp.Uint64()-epoch.CurrentTimestamp.Uint64()+60))
-			logTrace(fmt.Sprintf("sleep send prices for %v", wait), "sendARGPrice")
-			time.Sleep(wait)
+			go s.send()
+			time.Sleep(time.Minute * 3)
 		}
 	}
+}
+
+func (s *coinAveragePriceSender) send() {
+	logTrace("sending prices...", "send")
+	epoch, err := s.flare.GetCurrentPriceEpochData()
+	if err != nil {
+		logErr(fmt.Sprintln("err get epoch:", err.Error()), "send")
+		time.Sleep(time.Second * 1)
+		return
+	}
+
+	sleep, _ := time.ParseDuration(fmt.Sprintf("%vs", epoch.RevealEndTimestamp.Uint64()-epoch.CurrentTimestamp.Uint64()-60))
+	random := s.getRandom()
+
+	s.mu.Lock()
+	prices := s.currentPrices()
+	s.mu.Unlock()
+
+	logTrace(fmt.Sprintf("commiting prices"), "send")
+	if err := s.flare.CommitPrices(epoch.EpochID, s.tokens, prices, random); err != nil {
+		time.Sleep(time.Second * 1)
+		return
+	}
+
+	go s.reveal(sleep, epoch.EpochID, s.tokens, prices, random)
 }
 
 // reveal will wait the sleep time and then call the reveal smart-contract method
