@@ -23,10 +23,10 @@ func (s *coinAveragePriceSender) listenAndWrite(tokens []string, id int, freq in
 	for {
 		select {
 		case <-stop:
-			logTrace("stop...", "listenAndWrite")
+			logInfo("stop...", "listenAndWrite")
 			return
 		case <-s.resubscribe:
-			logTrace("resubscribing...", "listenAndWrite")
+			logInfo("resubscribing...", "listenAndWrite")
 			if err := s.subscribeCoinAveragePrice(tokens, id, freq, stream); err != nil {
 				logErr(fmt.Sprintln("err resubscribe:", err.Error()), "listenAndWrite")
 				return
@@ -44,9 +44,7 @@ func (s *coinAveragePriceSender) listenAndWrite(tokens []string, id int, freq in
 			price = price.Mul(price, big.NewFloat(100000))
 			integer, _ := price.Int64()
 
-			s.mu.Lock()
-			s.prices[tokenID] = big.NewInt(integer)
-			s.mu.Unlock()
+			s.prices.Store(tokenID, big.NewInt(integer))
 		}
 	}
 }
