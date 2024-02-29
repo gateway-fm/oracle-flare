@@ -18,8 +18,6 @@ type coinAveragePriceSender struct {
 	flare    flare.IFlare
 	wsClient wsClient.IWSClient
 
-	mu sync.Mutex
-
 	stopWriter  chan struct{}
 	stopSender  chan struct{}
 	stream      chan *wsClient.CoinAveragePriceStream
@@ -28,7 +26,7 @@ type coinAveragePriceSender struct {
 	// tokens are the tokens for each submit-reveal flow
 	tokens []contracts.TokenID
 	// prices are the prices for next submit-reveal flow
-	prices map[contracts.TokenID]*big.Int
+	prices sync.Map
 }
 
 // newCoinAveragePriceSender is used to get new coinAveragePriceSender instance
@@ -42,13 +40,12 @@ func newCoinAveragePriceSender(
 		id:          id,
 		flare:       flare,
 		wsClient:    ws,
-		mu:          sync.Mutex{},
 		stopWriter:  make(chan struct{}),
 		stopSender:  make(chan struct{}),
 		stream:      make(chan *wsClient.CoinAveragePriceStream),
 		resubscribe: make(chan struct{}),
 		tokens:      tokens,
-		prices:      make(map[contracts.TokenID]*big.Int),
+		prices:      sync.Map{},
 	}
 }
 
@@ -69,8 +66,12 @@ func (s *coinAveragePriceSender) currentPrices() []*big.Int {
 	for _, t := range s.tokens {
 		price := big.NewInt(0)
 
-		if s.prices[t] != nil {
-			price = s.prices[t]
+		p, ok := s.prices.Load(t)
+		if ok {
+			pb, ok := p.(*big.Int)
+			if ok {
+				price = pb
+			}
 		}
 
 		prices = append(prices, price)

@@ -28,7 +28,7 @@ func (s *coinAveragePriceSender) sendARGPrice(stop chan struct{}) {
 	for {
 		select {
 		case <-stop:
-			logTrace("stop...", "sendARGPrice")
+			logInfo("stop...", "sendARGPrice")
 			return
 		default:
 			go s.send()
@@ -38,7 +38,7 @@ func (s *coinAveragePriceSender) sendARGPrice(stop chan struct{}) {
 }
 
 func (s *coinAveragePriceSender) send() {
-	logTrace("sending prices...", "send")
+	logInfo("sending prices...", "send")
 	epoch, err := s.flare.GetCurrentPriceEpochData()
 	if err != nil {
 		logErr(fmt.Sprintln("err get epoch:", err.Error()), "send")
@@ -49,9 +49,7 @@ func (s *coinAveragePriceSender) send() {
 	sleep, _ := time.ParseDuration(fmt.Sprintf("%vs", epoch.RevealEndTimestamp.Uint64()-epoch.CurrentTimestamp.Uint64()-60))
 	random := s.getRandom()
 
-	s.mu.Lock()
 	prices := s.currentPrices()
-	s.mu.Unlock()
 
 	logTrace(fmt.Sprintf("commiting prices"), "send")
 	if err := s.flare.CommitPrices(epoch.EpochID, s.tokens, prices, random); err != nil {
