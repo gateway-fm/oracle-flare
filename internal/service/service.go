@@ -71,6 +71,7 @@ func (s *service) ListenAndSendAverageCoinPrice(tokens []string) {
 
 	s.nextID++
 
+	logInfo("starting write and send go-routines...", "ListenAndSendAverageCoinPrice")
 	go sender.runWriter()
 	go sender.runSender()
 }
