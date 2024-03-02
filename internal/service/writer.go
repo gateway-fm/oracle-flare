@@ -20,6 +20,7 @@ func (s *coinAveragePriceSender) runWriter() {
 
 // listenAndWrite is used to listen to the CoinAveragePriceStream chanel and write it to the coinAveragePriceSender struct
 func (s *coinAveragePriceSender) listenAndWrite(tokens []string, id int, freq int, stream chan *wsClient.CoinAveragePriceStream, stop chan struct{}) {
+	logInfo("starting listed and write loop...", "listenAndWrite")
 	for {
 		select {
 		case <-stop:
@@ -32,7 +33,7 @@ func (s *coinAveragePriceSender) listenAndWrite(tokens []string, id int, freq in
 				return
 			}
 		case data := <-stream:
-			logTrace(fmt.Sprintf("received data on the %s coin", data.Coin), "listenAndWrite")
+			logInfo(fmt.Sprintf("received data on the %s coin", data.Coin), "listenAndWrite")
 
 			tokenID := contracts.GetTokenIDFromName(data.Coin)
 			if tokenID == contracts.UnknownToken && tokenID.Index().Int64() < 0 {
