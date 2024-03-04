@@ -17,7 +17,7 @@ func init() {
 	// 114 - coston2 chain testnet
 	// 19 - songbird chain net
 
-	viper.SetDefault("tokens", []string{"ETH", "BTC"})
+	viper.SetDefault("tokens", []string{"BTC", "ETH"})
 
 	viper.SetDefault("flare.rpcurl", "https://flare-coston2.eu-north-2.gateway.fm/ext/bc/C/rpc")
 
