@@ -83,7 +83,7 @@ func (app *App) WhiteListAddressAll(address string) error {
 
 // Serve start serving Application service
 func (app *App) Serve() error {
-	go app.srv.ListenAndSendAverageCoinPrice(app.config.Tokens)
+	go app.srv.SendCoinAveragePrice(app.config.Tokens)
 
 	// Gracefully shutdown the server
 	quit := make(chan os.Signal, 1)
