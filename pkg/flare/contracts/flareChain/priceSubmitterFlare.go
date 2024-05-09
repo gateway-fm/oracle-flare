@@ -81,7 +81,7 @@ func (c *priceSubmitter) CommitPrices(epochID *big.Int, indices []contracts.Toke
 		return err
 	}
 
-	logger.Log().WithField("layer", "PriceSubmitter-CommitPrices").Infof("submitHash tx hash: %v time: %v", tx.Hash(), tx.Time())
+	logger.Log().WithField("layer", "PriceSubmitter-CommitPrices").Infof("submitHash epochID: %v tx hash: %v time: %v", epochID, tx.Hash(), tx.Time())
 
 	return nil
 }
@@ -102,11 +102,11 @@ func (c *priceSubmitter) RevealPrices(epochID *big.Int, indices []contracts.Toke
 
 	tx, err := c.contract.Transact(c.signer, "revealPrices", epochID, sortStruct.Indices, sortStruct.Prices, random)
 	if err != nil {
-		logger.Log().WithField("layer", "PriceSubmitter-RevealPrices").Errorln("err tx:", err.Error())
+		logger.Log().WithField("layer", "PriceSubmitter-RevealPrices").Errorf("epochID: %v err tx: %s", epochID, err.Error())
 		return err
 	}
 
-	logger.Log().WithField("layer", "PriceSubmitter-RevealPrices").Infof("revealPrices tx hash: %v time: %v", tx.Hash(), tx.Time())
+	logger.Log().WithField("layer", "PriceSubmitter-RevealPrices").Infof("revealPrices epochID: %v tx hash: %v time: %v", epochID, tx.Hash(), tx.Time())
 
 	return nil
 }
