@@ -100,6 +100,7 @@ func (c *priceSubmitter) RevealPrices(epochID *big.Int, indices []contracts.Toke
 
 	sort.Sort(sortStruct)
 
+	c.signer.GasLimit = 2000000
 	tx, err := c.contract.Transact(c.signer, "revealPrices", epochID, sortStruct.Indices, sortStruct.Prices, random)
 	if err != nil {
 		logger.Log().WithField("layer", "PriceSubmitter-RevealPrices").Errorf("epochID: %v err tx: %s", epochID, err.Error())
