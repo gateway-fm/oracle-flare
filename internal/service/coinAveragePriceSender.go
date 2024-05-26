@@ -36,9 +36,43 @@ func (s *service) SendCoinAveragePrice(tokens []string) {
 
 	go sender.runWriter()
 
+	currentEpoch, err := s.getCurrentPriceEpochDataRetries(0)
+	if err != nil {
+		logErr(fmt.Sprintf("err get currency epoch data: %v", err.Error()), "SendCoinAveragePrice")
+		return
+	}
+
+	durationSeconds := currentEpoch.EndTimestamp.Uint64() - currentEpoch.CurrentTimestamp.Uint64()
+	durationSeconds++
+
+	timerDuration, err := time.ParseDuration(fmt.Sprintf("%vs", durationSeconds))
+	if err != nil {
+		logErr(fmt.Sprintf("err parse timer duration: %v", err.Error()), "SendCoinAveragePrice")
+		return
+	}
+
+	logInfo(fmt.Sprintf("wait for the next epoch start: %v", timerDuration), "SendCoinAveragePrice")
+	timer := time.NewTimer(timerDuration)
+	<-timer.C
+
 	sender.ticker = time.NewTicker(time.Minute * 3)
 	logInfo("set ticker for sender to 3m", "SendCoinAveragePrice")
 	go sender.runSender()
+}
+
+func (s *service) getCurrentPriceEpochDataRetries(attempts int) (*contracts.PriceEpochData, error) {
+	data, err := s.flare.GetCurrentPriceEpochData()
+	if err != nil {
+		sleep, _ := time.ParseDuration(fmt.Sprintf("%vms", attempts*500))
+
+		logWarn(fmt.Sprintf("err GetCurrentPriceEpochData: %s retry in %v", err.Error(), sleep), "SendCoinAveragePrice")
+
+		time.Sleep(sleep)
+		attempts++
+		return s.getCurrentPriceEpochDataRetries(attempts)
+	}
+
+	return data, nil
 }
 
 // coinAVGPriceSender is a struct of the coin average prices sender
@@ -55,6 +89,8 @@ type coinAVGPriceSender struct {
 	resubscribe chan struct{}
 
 	ticker *time.Ticker
+
+	epochs syncmap.Map
 
 	// tokens are the tokens for each submit-reveal flow
 	tokens []contracts.TokenID
