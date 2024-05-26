@@ -22,18 +22,22 @@ func (s *coinAVGPriceSender) runSender() {
 				continue
 			}
 
+			epochID := epoch.EpochID
+			tokens := s.tokens
+			prices := s.parsePrices()
+			random := s.getRandom()
+
 			logInfo(fmt.Sprintf("epochID: %v current: %v reveal end: %v", epoch.EpochID, epoch.CurrentTimestamp, epoch.RevealEndTimestamp), "Sender")
 
 			sleep, _ := time.ParseDuration(fmt.Sprintf("%vs", epoch.RevealEndTimestamp.Uint64()-epoch.CurrentTimestamp.Uint64()-60))
-			random := s.getRandom()
 
-			if err := s.flare.CommitPrices(epoch.EpochID, s.tokens, s.parsePrices(), random); err != nil {
+			if err := s.flare.CommitPrices(epochID, tokens, prices, random); err != nil {
 				continue
 			}
 
 			timer := time.NewTimer(sleep)
 			logInfo(fmt.Sprintf("time for reverl: %v", sleep), "Sender")
-			go s.reveal(timer, epoch.EpochID, s.tokens, s.parsePrices(), random)
+			go s.reveal(timer, epochID, tokens, prices, random)
 		}
 	}
 }
